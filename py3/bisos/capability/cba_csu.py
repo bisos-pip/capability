@@ -90,6 +90,7 @@ from pathlib import Path
 
 from bisos.capability import cba_seed
 from bisos.capability import cbm_csu
+from bisos.capability import cba_sysd_csu
 
 from bisos.basics import pathPlus
 
@@ -132,6 +133,10 @@ def examples_csu_cba(
     cmnd('cbs_binsPrep',  args="", comment=f" # install cbs in sys/cbm")
     cmnd('cbs_assemble',  args="", comment=f" # remove cbs from sys/cbm")
     cmnd('cbs_materialize',  args="", comment=f" # remove cbs from sys/cbm")
+
+    cs.examples.menuChapter(f'= Capability Specification Type=')
+
+    cmnd('cbs_type',  args="", comment=f" # ")
 
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "CmndSvcs" :anchor ""  :extraInfo "Command Services Section"
 """ #+begin_org
@@ -201,7 +206,10 @@ class cbs_binsPrep(cs.Cmnd):
 
         binsPrep = cba_seed.cbaSeedInfo.binsPrep
         if binsPrep is not None:
-            print(f"binsPrep = {binsPrep}")
+            if b.subProc.WOpW(invedBy=self, log=1).bash(
+                f"""{binsPrep} -i binsPrep_fullUpdate""",
+            ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+
         else:
             print("Blank binsPrep")
 
@@ -235,11 +243,42 @@ class cbs_assemble(cs.Cmnd):
 
         assemble = cba_seed.cbaSeedInfo.assemble
         if assemble is not None:
-            print(f"assemble = {assemble}")
+            if b.subProc.WOpW(invedBy=self, log=1).bash(
+                f"""{assemble} -i fullUpdate""",
+            ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
         else:
             print("Blank assemble")
 
         return cmndOutcome.set(opResults=assemble)
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_type" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_type>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class cbs_type(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 1, 'Max': 1,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+        cmndArgsSpecDict = self.cmndArgsSpec()
+####+END:
+        if self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
+        #+end_org """): return(cmndOutcome)
+
+        return cmndOutcome.set(opResults=cba_seed.cbaSeedInfo.seedType)
+
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_materialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
 """ #+begin_org
@@ -269,46 +308,26 @@ class cbs_materialize(cs.Cmnd):
 
         materialize = cba_seed.cbaSeedInfo.materialize
         if materialize is not None:
-            print(f"materialize = {materialize}")
+            print(f"materialize = {materialize} -- We should execute that function or script.")
         else:
+            outcome = cbs_binsPrep().pyCmnd(argsList=[""])
+            if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
+
+            outcome = cbs_assemble().pyCmnd(argsList=[""])
+            if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
+
+            if cba_seed.cbaSeedInfo.seedType == "systemd":
+                G_myFullName = sys.argv[0]
+
+                if b.subProc.WOpW(invedBy=self, log=1).bash(
+                        f"""{G_myFullName} -i sysdUnitsProc ensure all""",
+                ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+
+
+
             print("Blank materialize")
 
         return cmndOutcome.set(opResults=materialize)
-
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_binsPrep" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
-""" #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_binsPrep>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
-#+end_org """
-class cbs_binsPrep(cs.Cmnd):
-    cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 1, 'Max': 1,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-             argsList: typing.Optional[list[str]]=None,  # CsArgs
-    ) -> b.op.Outcome:
-
-        failed = b_io.eh.badOutcome
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
-            return failed(cmndOutcome)
-        cmndArgsSpecDict = self.cmndArgsSpec()
-####+END:
-        if self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
-        #+end_org """): return(cmndOutcome)
-
-        binsPrep = cba_seed.cbaSeedInfo.binsPrep
-        if binsPrep is not None:
-            print(f"binsPrep = {binsPrep}")
-        else:
-            print("Blank binsPrep")
-
-        return cmndOutcome.set(opResults=binsPrep)
 
 
 ####+BEGIN: b:py3:cs:func/typing :funcName "examples_csu_cbmSymlinkToThisCbs" :funcType "eType" :retType "" :deco "default" :argsList ""
@@ -382,12 +401,12 @@ class cbmSymlinkToThisCbs(cs.Cmnd):
 
         if action == "enable":
             pathPlus.symlink_update(cbmFileName, myFullName)
-            return cmndOutcome.set(opResults=cbmFileName)
+            return cmndOutcome.set(opResults=f"Enabled: {cbmFileName}")
 
         elif action == "disable":
             if cbmFileName.is_symlink():
                 cbmFileName.unlink()
-            return cmndOutcome.set(opResults=cbmFileName)
+            return cmndOutcome.set(opResults=f"Disabled: {cbmFileName}")
 
         elif action == "isEnabled":
             if cbmFileName.is_symlink():

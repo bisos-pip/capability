@@ -6,36 +6,18 @@ bisos.capability: BISOS Capabilities Bundles – Abstraction, Specification and 
    :depth: 3
 ..
 
-+--------------------------+------------------------------------------+
-| ``Blee Panel Controls``: | `Show-All <elisp:(show-all)>`__ :        |
-|                          | `Overview <elisp:(org-shifttab)>`__ :    |
-|                          | `Content <elisp:                         |
-|                          | (progn (org-shifttab) (org-content))>`__ |
-|                          | : `(1) <elisp:(delete-other-windows)>`__ |
-|                          | :                                        |
-|                          | `S&Q <elisp                              |
-|                          | :(progn (save-buffer) (kill-buffer))>`__ |
-|                          | : `Save <elisp:(save-buffer)>`__ :       |
-|                          | `Quit <elisp:(kill-buffer)>`__ :         |
-|                          | `Bury <elisp:(bury-buffer)>`__           |
-+--------------------------+------------------------------------------+
-| ``Panel Links``:         | `Repo Blee                               |
-|                          | Panel <./panels/bisos.capabil            |
-|                          | ity/_nodeBase_/fullUsagePanel-en.org>`__ |
-+--------------------------+------------------------------------------+
-| ``See Also``:            | `At                                      |
-|                          | PYPI <https                              |
-|                          | ://pypi.org/project/bisos.capability>`__ |
-|                          | :                                        |
-|                          | `bisos.PyC                               |
-|                          | S <https://github.com/bisos-pip/pycs>`__ |
-+--------------------------+------------------------------------------+
-
 Overview
 ========
 
 bisos.capability is a python package for BISOS Capabilities Bundles –
 Abstraction, Specification and Materialization.
+
+Package Documentation At Github
+===============================
+
+The information below is a subset of the full of documentation for this
+bisos-pip package. More complete documentation is available at:
+https://github.com/bisos-pip/capability-cs
 
 Realted Resources
 =================
@@ -53,6 +35,8 @@ Table of Contents TOC
 =====================
 
 -  `Overview <#overview>`__
+-  `Package Documentation At
+   Github <#package-documentation-at-github>`__
 -  `Realted Resources <#realted-resources>`__
 -  `Installation <#installation>`__
 

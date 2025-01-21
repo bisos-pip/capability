@@ -90,8 +90,9 @@ import subprocess
 from pathlib import Path
 from bisos.bpo import bpo
 from bisos.platform import platformBases_csu
+from bisos.platform import platformBases
 from bisos.basics import pathPlus
-
+from bisos.capability import cba_seed
 
 ####+BEGIN: b:py3:cs:orgItem/section :title "CSU-Lib Examples" :comment "-- Providing examples_csu"
 """ #+begin_org
@@ -142,9 +143,21 @@ def examples_csu(
 
     for eachCbs in listOfCbs:
 
+        if (outcome := b.subProc.WOpW(invedBy=None, log=0).bash(
+                f"""{eachCbs}  -i cbs_type""",
+        )).isProblematic(): continue
+        cbsSeedType = outcome.stdout.strip()
+
         cs.examples.menuSection(f'=Process CBS {eachCbs}=')
+        cmnd('processCbs', args=f"type {eachCbs}", comment=f" # {cbsSeedType}")
         cmnd('processCbs', args=f"report {eachCbs}", comment=f"")
         cmnd('processCbs', args=f"report", wrapper=f"echo {eachCbs}",  comment=f"")
+        cmnd('processCbs', args=f"load {eachCbs}", comment=f"")
+        cmnd('processCbs', args=f"binsPrep {eachCbs}", comment=f"")
+        cmnd('processCbs', args=f"assemble {eachCbs}", comment=f"")
+        if cbsSeedType == "systemd":
+            cmnd('processCbs', args=f"sysdEnsure {eachCbs}", comment=f"")
+        cmnd('processCbs', args=f"materialize {eachCbs}", comment=f"")
 
     if len(listOfCbs) != 0:
         listOfCbsStr = [ str(i) for i in listOfCbs ]
@@ -152,6 +165,8 @@ def examples_csu(
         cs.examples.menuSection(f'=Process All CBS=')
         cmnd('processCbs', args=f"report", wrapper=f"echo {joinedListOfCbs} |",  comment=f"")
         cmnd('processCbs', args=f"report all", comment=f"")
+        cmnd('processCbs', args=f"materialize", wrapper=f"echo {joinedListOfCbs} |",  comment=f"")
+        cmnd('processCbs', args=f"materialize all", comment=f"")
 
 
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "CmndSvcs" :anchor ""  :extraInfo "Command Services Section"
@@ -189,17 +204,16 @@ class cbmBase(cs.Cmnd):
 
         action = self.cmndArgsGet("0&1", cmndArgsSpecDict, argsList)[0]
 
+        platformBaseDir = platformBases
+
         outcome = platformBases_csu.platformBase().pyCmnd(argsList=["obtain"])
         platformBaseDir = outcome.results
 
         # /bisos/platform/sys/cbm
         cbmBaseDir = platformBaseDir.joinpath("sys/cbm")
 
-
         if action == "mkdir":
-
             cbmBaseDir.mkdir(parents=True, exist_ok=True)
-
             return cmndOutcome.set(opResults=cbmBaseDir)
 
         elif action == "obtain":
@@ -301,19 +315,39 @@ This pattern is called listOfArgs subject to Action.
 *****  [[elisp:(org-cycle)][| *Note:* | ]] Process Each based on actions
         #+end_org """)
 
+        def runCbs(cbs, action):
+            if b.subProc.WOpW(invedBy=self, log=1).bash(
+                    f"""{cbs}  -i cbs_{action}""",
+            ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
+
+        def runCbsSysdEnsure(cbs, action):
+            if b.subProc.WOpW(invedBy=self, log=1).bash(
+                    f"""{cbs}  -i sysdUnitsProc ensure all""",
+            ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
+
+
         def processEach(eachCbs):
             nonlocal processedCount
             processedCount += 1
             
-            if action == "materialize":
+            if action == "report":
                 print(f"{action} -- {eachCbs}")
+
+            elif action == "load":
+                runCbs(eachCbs, action)
 
             elif action == "binsPrep":
-                print(f"{action} -- {eachCbs}")
+                runCbs(eachCbs, action)
 
-            elif action == "report":
-                print(f"{action} -- {eachCbs}")
+            elif action == "assemble":
+                runCbs(eachCbs, action)
 
+            elif action == "sysdEnsure":
+                runCbsSysdEnsure(eachCbs, action)
+
+            elif action == "materialize":
+                runCbs(eachCbs, action)
+                
             else:
                 return failed(cmndOutcome)
 
@@ -343,132 +377,17 @@ This pattern is called listOfArgs subject to Action.
         cmndArgsSpecDict.argsDictAdd(
             argPosition="0",
             argName="action",
-            argChoices=['echo', 'encrypt', 'ls', 'date'],
+            argChoices=['report', 'load', 'binsPrep', 'assemble', 'materialize'],
             argDescription="Action to be specified by rest"
         )
         cmndArgsSpecDict.argsDictAdd(
             argPosition="1&9999",
             argName="actionArgs",
-            argChoices=[],
+            argChoices=['all', ''],
             argDescription="Rest of args for use by action"
         )
 
         return cmndArgsSpecDict
-
-
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "parsArgsStdinCmndResult" :extent "verify" :comment "stdin as input" :parsMand "par1Example" :parsOpt "par2Example" :argsMin 1 :argsMax 9999 :pyInv "methodInvokeArg"
-""" #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<parsArgsStdinCmndResult>>  *stdin as input*  =verify= parsMand=par1Example parsOpt=par2Example argsMin=1 argsMax=9999 ro=cli pyInv=methodInvokeArg   [[elisp:(org-cycle)][| ]]
-#+end_org """
-class parsArgsStdinCmndResult(cs.Cmnd):
-    cmndParamsMandatory = [ 'par1Example', ]
-    cmndParamsOptional = [ 'par2Example', ]
-    cmndArgsLen = {'Min': 1, 'Max': 9999,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-             par1Example: typing.Optional[str]=None,  # Cs Mandatory Param
-             par2Example: typing.Optional[str]=None,  # Cs Optional Param
-             argsList: typing.Optional[list[str]]=None,  # CsArgs
-             methodInvokeArg: typing.Any=None,   # pyInv Argument
-    ) -> b.op.Outcome:
-        """stdin as input"""
-        callParamsDict = {'par1Example': par1Example, 'par2Example': par2Example, }
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
-            return b_io.eh.badOutcome(cmndOutcome)
-        cmndArgsSpecDict = self.cmndArgsSpec()
-        par1Example = csParam.mappedValue('par1Example', par1Example)
-        par2Example = csParam.mappedValue('par2Example', par2Example)
-####+END:
-        self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]] This is an example of a CmndSvc with lots of features.
-The features include:
-
-        1) An optional parameter called someParam
-        2) A first mandatory argument called action which must be one of list or print.
-        3) An optional set of additional argumets.
-
-The param, and args are then validated and form a single string.
-That string is then echoed in a sub-prococessed. The stdout of that sub-proc is assigned
-to a variable similar to bash back-quoting.
-
-And that variable is then printed.
-
-Variations of this are captured as snippets to be used.
-        #+end_org """)
-
-        self.captureRunStr(""" #+begin_org
-#+begin_src sh :results output :session shared
-  csExamples.cs --par1Example="par1Mantory" --par2Example="par2Optional" -i parsArgsStdinCmndResult arg1 argTwo
-#+end_src
-#+RESULTS:
-:
-: cmndArgs= arg1  argTwo
-: stdin instead of methodInvokeArg =
-: cmndParams= par1Mantory par2Optional
-: OpError.Success
-        #+end_org """)
-
-        if self.justCaptureP(): return cmndOutcome
-
-
-        action = self.cmndArgsGet("0", cmndArgsSpecDict, argsList)
-        actionArgs = self.cmndArgsGet("1&9999", cmndArgsSpecDict, argsList)
-
-        actionArgsStr = ""
-        for each in actionArgs:
-            actionArgsStr = actionArgsStr + " " + each
-
-        actionAndArgs = f"""{action} {actionArgsStr}"""
-
-
-        b.comment.orgMode(""" #+begin_org
-*****  [[elisp:(org-cycle)][| *Note:* | ]] Next we take in stdin, when interactive.
-After that, we print the results and then provide a result in =cmndOutcome=.
-        #+end_org """)
-
-        if not methodInvokeArg:
-            methodInvokeArg = b_io.stdin.read()
-
-        print(f"cmndArgs= {actionAndArgs}")
-        print(f"stdin instead of methodInvokeArg = {methodInvokeArg}")
-        print(f"cmndParams= {par1Example} {par2Example}")
-
-        return cmndOutcome.set(
-            opError=b.op.OpError.Success,
-            opResults="cmnd results come here",
-        )
-
-####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
-    """ #+begin_org
-**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default  [[elisp:(org-cycle)][| ]]
-    #+end_org """
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmndArgsSpec(self, ):
-####+END:
-        """  #+begin_org
-*** [[elisp:(org-cycle)][| *cmndArgsSpec:* | ]] First arg defines rest
-        #+end_org """
-
-        cmndArgsSpecDict = cs.arg.CmndArgsSpecDict()
-        cmndArgsSpecDict.argsDictAdd(
-            argPosition="0",
-            argName="action",
-            argChoices=['echo', 'encrypt', 'ls', 'date'],
-            argDescription="Action to be specified by rest"
-        )
-        cmndArgsSpecDict.argsDictAdd(
-            argPosition="1&9999",
-            argName="actionArgs",
-            argChoices=[],
-            argDescription="Rest of args for use by action"
-        )
-
-        return cmndArgsSpecDict
-
 
 
 ####+BEGIN: bx:icm:py3:section :title "CS-Commands --- Full Update"

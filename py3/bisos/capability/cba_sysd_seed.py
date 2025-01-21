@@ -100,10 +100,12 @@ class SysdUnit(object):
     def __init__(
             self,
             name: str | None =None,
+            seededCs: str | None =None,            
             func: typing.Callable | None =None,
             osVers: list[str] | None =None,
     ):
         self._sysdUnitName = name
+        self._sysdUnitSeededCs = seededCs
         self._sysdUnitFunc = func
         self._osVers = osVers
 
@@ -114,6 +116,14 @@ class SysdUnit(object):
     @name.setter
     def name(self, value: str | None,):
         self._sysdUnitName = value
+
+    @property
+    def seededCs(self) -> str | None:
+        return self._sysdUnitSeededCs
+
+    @seededCs.setter
+    def seededCs(self, value: str | None,):
+        self._sysdUnitSeededCs = value
 
     @property
     def func(self) -> typing.Callable | None:
@@ -206,6 +216,7 @@ sysdSeedInfo = SysdSeedInfo()
 def sysdUnit(
 ####+END:
         pkgName: str,
+        seededCs: str,
         func: typing.Callable | None = None,
         osVers: list[str] | None = None,
 ) -> SysdUnit:
@@ -213,7 +224,7 @@ def sysdUnit(
 ** [[elisp:(org-cycle)][| *DocStr | ]
     #+end_org """
 
-    pkg = SysdUnit(name=pkgName, func=func, osVers=osVers)
+    pkg = SysdUnit(name=pkgName, seededCs=seededCs, func=func, osVers=osVers)
     return pkg
 
 ####+BEGIN: b:py3:cs:func/typing :funcName "setup" :funcType "extTyped" :deco "track"

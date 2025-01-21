@@ -142,14 +142,14 @@ def examples_csu(
         pass
 
     if len(sysdUnitNames) != 0:
-        cs.examples.menuChapter(f'=Sysd Unit Names {sysdUnitNames}=')
+        cs.examples.menuChapter(f'=Sysd Unit Names {sysdUnitNames} - Always processes all=')
 
-        cmnd('sysdUnits_list', comment=f" # List specified sysdUnits")
+        # cmnd('sysdUnits_list', comment=f" # List specified sysdUnits")
 
-        cmnd('sysdUnit_isInstalled', args=f"{sysdUnitNames[0]}", comment=f" # Is the specified aptPkg installed")
+        cmnd('sysdUnitsProc', args=f"status all", comment=f" # Is the specified aptPkg installed")
 
-        cmnd('sysdUnits_update', args="all", comment=f" # Install or Update spec sysdUnits")
-        cmnd('sysdUnits_update', args=f"{' '.join(sysdUnitNames)}", comment=f" # List specified aptPkgs")
+        cmnd('sysdUnitsProc', args="ensure all", comment=f" # Install or Update spec sysdUnits")
+        # cmnd('sysdUnitsProc', args=f"update {' '.join(sysdUnitNames)}", comment=f" # List specified aptPkgs")
 
 
     # cs.examples.menuChapter(f'=Problem Unknown seedType={seedType}=')
@@ -172,149 +172,11 @@ def examples_csu(
 ####+END:
 
 
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "sysdUnits_updateAll" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "sysdUnitsProc" :extent "verify" :comment "stdin as input" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 9999 :pyInv "methodInvokeArg"
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<sysdUnits_fullUpdate>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<sysdUnitsProc>>  *stdin as input*  =verify= argsMin=1 argsMax=9999 ro=cli pyInv=methodInvokeArg   [[elisp:(org-cycle)][| ]]
 #+end_org """
-class sysdUnits_fullUpdate(cs.Cmnd):
-    cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 0, 'Max': 0,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-    ) -> b.op.Outcome:
-
-        failed = b_io.eh.badOutcome
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
-            return failed(cmndOutcome)
-####+END:
-        if self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  A starting point command.
-        #+end_org """): return(cmndOutcome)
-
-        if sysdUnits_update().pyCmnd(cmndOutcome=cmndOutcome, argsList=["all"]
-                                  ).isProblematic():
-            return(b_io.eh.badOutcome(cmndOutcome))
-
-        return cmndOutcome
-
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "sysdUnits_list" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
-""" #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<sysdUnits_list>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
-#+end_org """
-class sysdUnits_list(cs.Cmnd):
-    cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 0, 'Max': 0,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-    ) -> b.op.Outcome:
-
-        failed = b_io.eh.badOutcome
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
-            return failed(cmndOutcome)
-####+END:
-        if self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  A starting point command.
-        #+end_org """): return(cmndOutcome)
-
-        if cba_sysd_seed.sysdSeedInfo.sysdUnitsList is not None:
-            for eachPkg in cba_sysd_seed.sysdSeedInfo.sysdUnitsList:
-                print(f"pkgName = {eachPkg.name}")
-        else:
-            print("Empty Pkgs List")
-
-        return cmndOutcome.set(opResults=cba_sysd_seed.sysdSeedInfo.sysdUnitNames())
-
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "sysdUnit_isMaterialized" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
-""" #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<sysdUnit_isMaterialized>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
-#+end_org """
-class sysdUnit_isMaterialized(cs.Cmnd):
-    cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 1, 'Max': 1,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-             argsList: typing.Optional[list[str]]=None,  # CsArgs
-    ) -> b.op.Outcome:
-
-        failed = b_io.eh.badOutcome
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
-            return failed(cmndOutcome)
-        cmndArgsSpecDict = self.cmndArgsSpec()
-####+END:
-        if self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  A starting point command.
-        #+end_org """): return(cmndOutcome)
-
-        self.captureRunStr(""" #+begin_org
-#+begin_src sh :results output :session shared
-  facter.cs -i factName networking.primary os.distro.id
-#+end_src
-#+RESULTS:
-: [{'networking.primary': 'eno1'}, {'os.distro.id': 'Debian'}]
-        #+end_org """)
-
-        pkgName = self.cmndArgsGet("0&1", cmndArgsSpecDict, argsList)
-
-        # if b.subProc.WOpW(invedBy=self, log=1).bash(
-        #        f"""apt list {pkgName[0]} --installed  2> /dev/null  | grep 'installed'""",
-        # ).isProblematic():
-        #     pass
-        #     # return(b_io.eh.badOutcome(cmndOutcome))
-
-        if b.subProc.WOpW(invedBy=self, log=1).bash(
-               f"""apt list {pkgName[0]} --installed  2> /dev/null""",
-        ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
-
-        if cmndOutcome.stdout.find('installed') == -1:
-            result = False
-        else:
-            result = True
-
-        return cmndOutcome.set(opResults=result)
-
-####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
-    """ #+begin_org
-**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default  [[elisp:(org-cycle)][| ]]
-    #+end_org """
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmndArgsSpec(self, ):
-####+END:
-        """
-***** Cmnd Args Specification
-"""
-        cmndArgsSpecDict = cs.CmndArgsSpecDict()
-        cmndArgsSpecDict.argsDictAdd(
-            argPosition="0&1",
-            argName="pkgName",
-            argDefault='',
-            argChoices=[],
-            argDescription="One argument, any string as a pkgName"
-        )
-        return cmndArgsSpecDict
-
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "sysdUnits_Materialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 9999 :pyInv ""
-""" #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<sysdUnits_Materialize>>  =verify= argsMin=1 argsMax=9999 ro=cli   [[elisp:(org-cycle)][| ]]
-#+end_org """
-class sysdUnits_Materialize(cs.Cmnd):
+class sysdUnitsProc(cs.Cmnd):
     cmndParamsMandatory = [ ]
     cmndParamsOptional = [ ]
     cmndArgsLen = {'Min': 1, 'Max': 9999,}
@@ -324,46 +186,97 @@ class sysdUnits_Materialize(cs.Cmnd):
              rtInv: cs.RtInvoker,
              cmndOutcome: b.op.Outcome,
              argsList: typing.Optional[list[str]]=None,  # CsArgs
+             methodInvokeArg: typing.Any=None,   # pyInv Argument
     ) -> b.op.Outcome:
-
+        """stdin as input"""
         failed = b_io.eh.badOutcome
         callParamsDict = {}
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
             return failed(cmndOutcome)
         cmndArgsSpecDict = self.cmndArgsSpec()
 ####+END:
-        if self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  A starting point command.
-        #+end_org """): return(cmndOutcome)
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]] Process list of CBSs. arg1 is action for processing. args2 to N are Cbs.
+When arg2 is all, list of args is obtained. After args, stdin (or methodInvokeArg) is expected to have a list of Cbs as lines.
+This pattern is called listOfArgs subject to Action.
+        #+end_org """)
 
-        cmndArgsSpecDict = self.cmndArgsSpec()
-        cmndArgs = self.cmndArgsGet("0&9999", cmndArgsSpecDict, argsList)
+        self.captureRunStr(""" #+begin_org
+#+begin_src sh :results output :session shared
+  cbm-materialize-cbs.cs  -i processCbs report /bisos/platform/sys/cbm/facter-cbs-is-p-sysd.cs
+#+end_src
+#+RESULTS:
+:
+        #+end_org """)
 
-        if cmndArgs[0] == "all":
-            cmndArgs = cba_sysd_seed.sysdSeedInfo.sysdUnitNames()
-            if len(cmndArgs) == 0:
-                cmndOutcome.report("No AptPkgs -- Installation skipped")
+        self.captureRunStr(""" #+begin_org
+#+begin_src sh :results output :session shared
+  echo  /bisos/platform/sys/cbm/facter-cbs-is-p-sysd.cs | cbm-materialize-cbs.cs  -i processCbs report
+#+end_src
+#+RESULTS:
+:
+        #+end_org """)
 
-        for each in cmndArgs:
-            if sysdUnit_isMaterialized().pyCmnd(cmndOutcome=cmndOutcome, argsList=[f"{each}"]).results:
-                print(f"{each} is already installed -- skipped")
-                continue
-            else:
-                # <2024-11-18 Mon 14:05>  MB -- Notyet, below commented out not working
-                aptPkg  = cba_sysd_seed.sysdSeedInfo.namedAptPkg(each)
-                if aptPkg is None:
-                    b_io.eh.problem_usageError(f"{each}")
-                    continue
-                if aptPkg.func is None:
-                    if b.subProc.WOpW(invedBy=self, log=1).bash(
-                            f'''sudo apt-get install {each}''',
-                    ).isProblematic():
-                        pass
-                        # return(b_io.eh.badOutcome(cmndOutcome))
+        if self.justCaptureP(): return cmndOutcome
+
+        action = self.cmndArgsGet("0", cmndArgsSpecDict, argsList)
+        listOfSubject = self.cmndArgsGet("1&9999", cmndArgsSpecDict, argsList)
+
+        if listOfSubject:
+            if listOfSubject[0] == "all":
+                if cba_sysd_seed.sysdSeedInfo.sysdUnitsList is not None:
+                    listOfSubject = cba_sysd_seed.sysdSeedInfo.sysdUnitsList
                 else:
-                    aptPkg.func()
+                    print("Empty Pkgs List")
+                    return failed(cmndOutcome)
 
-        return(cmndOutcome.set(opResults=None))
+        # methodInvokeArg is expected to be a string of lines.1
+        if not methodInvokeArg:
+            methodInvokeArg = b_io.stdin.read()
+
+        processedCount = 0
+
+        b.comment.orgMode(""" #+begin_org
+*****  [[elisp:(org-cycle)][| *Note:* | ]] Process Each based on actions
+        #+end_org """)
+
+        def status(subject):
+            if b.subProc.Op(outcome=cmndOutcome, log=1).bash(
+f"""{subject.seededCs} -i sysdSysUnit status""",
+            ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+
+        def ensure(subject):
+            if b.subProc.Op(outcome=cmndOutcome, log=1).bash(
+f"""{subject.seededCs} -i sysdSysUnit ensure""",
+            ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+
+        def processEach(eachSubject):
+            nonlocal processedCount
+            processedCount += 1
+
+            if action == "status":
+                status(eachSubject)
+
+            elif action == "ensure":
+                ensure(eachSubject)
+
+            else:
+                return failed(cmndOutcome)
+
+        if len(listOfSubject) == 0 and len(methodInvokeArg.splitlines()) == 0:
+            return failed(cmndOutcome)
+
+        for eachSubject in listOfSubject:
+            processEach(eachSubject)
+
+        # Process Stdin
+        for eachSubject in methodInvokeArg.splitlines():
+            processEach(eachSubject)
+
+        return cmndOutcome.set(
+            opError=b.op.OpError.Success,
+            opResults=processedCount,
+        )
 
 ####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
     """ #+begin_org
@@ -372,17 +285,24 @@ class sysdUnits_Materialize(cs.Cmnd):
     @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
     def cmndArgsSpec(self, ):
 ####+END:
-        """
-***** Cmnd Args Specification
-"""
-        cmndArgsSpecDict = cs.CmndArgsSpecDict()
+        """  #+begin_org
+*** [[elisp:(org-cycle)][| *cmndArgsSpec:* | ]] First arg defines rest
+        #+end_org """
+
+        cmndArgsSpecDict = cs.arg.CmndArgsSpecDict()
         cmndArgsSpecDict.argsDictAdd(
-            argPosition="0&9999",
-            argName="cmndArgs",
-            argDefault='',
-            argChoices=[],
-            argDescription="List of  pkgsNames"
+            argPosition="0",
+            argName="action",
+            argChoices=['report', 'load', 'binsPrep', 'assemble', 'materialize'],
+            argDescription="Action to be specified by rest"
         )
+        cmndArgsSpecDict.argsDictAdd(
+            argPosition="1&9999",
+            argName="actionArgs",
+            argChoices=['all', ''],
+            argDescription="Rest of args for use by action"
+        )
+
         return cmndArgsSpecDict
 
 

@@ -1,11 +1,6 @@
 #+title: bisos.capability:  BISOS Capabilities Bundles -- Abstraction, Specification and Materialization
 
 
-|----------------------+------------------------------------------------------------------|
-| ~Blee Panel Controls~: | [[elisp:(show-all)][Show-All]] : [[elisp:(org-shifttab)][Overview]] : [[elisp:(progn (org-shifttab) (org-content))][Content]] : [[elisp:(delete-other-windows)][(1)]] : [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] : [[elisp:(save-buffer)][Save]]  : [[elisp:(kill-buffer)][Quit]]  : [[elisp:(bury-buffer)][Bury]] |
-| ~Panel Links~:         | [[file:./panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]]                                                  |
-| ~See Also~:            | [[https://pypi.org/project/bisos.capability][At PYPI]] : [[https://github.com/bisos-pip/pycs][bisos.PyCS]]                                             |
-|----------------------+------------------------------------------------------------------|
 
 
 * Overview
@@ -14,6 +9,11 @@ bisos.capability is a python package for BISOS Capabilities Bundles -- Abstracti
 Materialization.
 
 
+
+* Package Documentation At Github
+
+The information below is a subset of the full of documentation for this bisos-pip package.
+More complete documentation is available at: https://github.com/bisos-pip/capability-cs
 
 
 * Realted Resources
@@ -24,6 +24,7 @@ Materialization.
 
 * Table of Contents     :TOC:
 - [[#overview][Overview]]
+- [[#package-documentation-at-github][Package Documentation At Github]]
 - [[#realted-resources][Realted Resources]]
 - [[#installation][Installation]]
   - [[#installation-with-pip][Installation With pip]]

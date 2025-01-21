@@ -57,8 +57,10 @@ requires = [
 "blee.icmPlayer",
 "bisos",
 "bisos.b",
+"bisos.basics",
+"bisos.bpo",
 "bisos.common",
-"bisos.graphviz",
+"bisos.platform",
 ]
 ####+END:
 
@@ -66,8 +68,9 @@ requires = [
 ####+BEGIN: b:py3:pypi:setup/scripts :comment ""
 
 scripts = [
-'bin/exmpl-graphviz.cs',
-'bin/seedGraphviz.cs',
+'bin/capMaterializationDispatch.cs',
+'bin/cba-sysd.cs',
+'bin/cbm-materialize-cbs.cs',
 ]
 ####+END:
 
