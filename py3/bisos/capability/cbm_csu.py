@@ -204,10 +204,10 @@ class cbmBase(cs.Cmnd):
 
         action = self.cmndArgsGet("0&1", cmndArgsSpecDict, argsList)[0]
 
-        platformBaseDir = platformBases
+        platformBaseDir = platformBases.platformBasePath()
 
-        outcome = platformBases_csu.platformBase().pyCmnd(argsList=["obtain"])
-        platformBaseDir = outcome.results
+        # outcome = platformBases_csu.platformBase().pyCmnd(argsList=["obtain"])
+        # platformBaseDir = outcome.results
 
         # /bisos/platform/sys/cbm
         cbmBaseDir = platformBaseDir.joinpath("sys/cbm")
