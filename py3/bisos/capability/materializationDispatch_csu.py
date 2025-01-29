@@ -268,7 +268,7 @@ This pattern is called listOfArgs subject to Action.
 
         if ( execPath := pathPlus.whichOrDefaultBinPath(
             "facter-cbs-is-p-sysd.cs",
-            Path("/bisos/git/bxRepos/bisos-pip/facter/py3/bin/facter-cbs-is-p-sysd.cs")
+            Path("/bisos/venv/py3/bisos3/bin/facter-cbs-is-p-sysd.cs")
         )) is None:
             return(b_io.eh.badOutcome(cmndOutcome))
 
