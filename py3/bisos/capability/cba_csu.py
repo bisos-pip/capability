@@ -395,12 +395,14 @@ class cbmSymlinkToThisCbs(cs.Cmnd):
         outcome = cbm_csu.cbmBase().pyCmnd(argsList=["obtain"])
         cbmBaseDir = outcome.results
 
+        cbmBaseDir.mkdir(parents=True, exist_ok=True)
+
         cbmFileName = cbmBaseDir.joinpath(myFullName.name)
 
         action = self.cmndArgsGet("0&1", cmndArgsSpecDict, argsList)[0]
 
         if action == "enable":
-            pathPlus.symlink_update(cbmFileName, myFullName)
+            pathPlus.symlink_update(myFullName, cbmFileName)
             return cmndOutcome.set(opResults=f"Enabled: {cbmFileName}")
 
         elif action == "disable":

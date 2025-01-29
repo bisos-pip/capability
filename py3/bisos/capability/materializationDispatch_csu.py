@@ -382,7 +382,7 @@ This pattern is called listOfArgs subject to Action.
             ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
         else:
             print(f"Skipped: Missing {platformSysBinPreDispatch}")
-            b_io.warning(f"Skipped: Missing {platformSysBinPreDispatch}")
+            # b_io.warning(f"Skipped: Missing {platformSysBinPreDispatch}")
 
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
@@ -437,7 +437,7 @@ This pattern is called listOfArgs subject to Action.
             ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
         else:
             print(f"Skipped: Missing {platformSysBinPostDispatch}")
-            b_io.warning(f"Skipped: Missing {platformSysBinPostDispatch}")
+            # b_io.warning(f"Skipped: Missing {platformSysBinPostDispatch}")
 
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
