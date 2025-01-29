@@ -480,7 +480,7 @@ This pattern is called listOfArgs subject to Action.
         #+end_org """)
 
         if b.subProc.WOpW(invedBy=self, log=1).bash(
-            f"""cbm-materialize-cbs.cs  -i processCbs materialize all""",
+            f"""/bisos/venv/py3/bisos3/bin/cbm-materialize-cbs.cs -i processCbs materialize all""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
         return cmndOutcome.set(
