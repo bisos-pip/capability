@@ -25,10 +25,10 @@
 ####+BEGIN: blee:bxPanel:terseTreeNavigator :panelsList "bxPanel"
 * [[elisp:(show-all)][(>]] [[elisp:(describe-function 'org-dblock-write:blee:bxPanel:terseTreeNavigator)][dbf]]
 * +
-*   =Decedents=  :: [[elisp:(blee:bnsm:panel-goto "/bisos/panels/capabilities/cbMater/cbMater-is-o-tinydns.cs/_nodeBase_")][ =cbMater-is-o-tinydns.cs= ]] *|*
+*   =Decedents=  :: [[elisp:(blee:bnsm:panel-goto "/bisos/panels/bisos-core/bisos-pip/bisos.capability/cbMater/cbMater-is-o-tinydns.cs/_nodeBase_")][ =cbMater-is-o-tinydns.cs= ]] *|*
 *                                        *━━━━━━━━━━━━━━━━━━━━━━━━*
-*   *Siblings*   :: [[elisp:(blee:bnsm:panel-goto "/bisos/panels/capabilities/cbMater/_nodeBase_")][ =cbMater= ]] *|* [[elisp:(blee:bnsm:panel-goto "/bisos/panels/capabilities/conceptsAndTerminology/_nodeBase_")][ =conceptsAndTerminology= ]] *|*
-*   /Ancestors/  :: [[elisp:(blee:bnsm:panel-goto "//bisos/panels/capabilities/_nodeBase_")][ =capabilities= ]] *|* [[elisp:(blee:bnsm:panel-goto "//bisos/panels/_nodeBase_")][ = /<panels>/ = ]] *|* [[elisp:(dired "//bisos")][ ~bisos~ ]] *|*
+*   *Siblings*   :: [[elisp:(blee:bnsm:panel-goto "/bisos/panels/bisos-core/bisos-pip/bisos.capability/README")][README]] *|* [[elisp:(blee:bnsm:panel-goto "/bisos/panels/bisos-core/bisos-pip/bisos.capability/cbMater/_nodeBase_")][ =cbMater= ]] *|* [[elisp:(blee:bnsm:panel-goto "/bisos/panels/bisos-core/bisos-pip/bisos.capability/conceptsAndTerminology/_nodeBase_")][ =conceptsAndTerminology= ]] *|* [[elisp:(blee:bnsm:panel-goto "/bisos/panels/bisos-core/bisos-pip/bisos.capability/materializationLayers/_nodeBase_")][ =materializationLayers= ]] *|*
+*   /Ancestors/  :: [[elisp:(blee:bnsm:panel-goto "//bisos/panels/bisos-core/bisos-pip/bisos.capability/_nodeBase_")][ = /<bisos.capability>/ = ]] *|* [[elisp:(blee:bnsm:panel-goto "//bisos/panels/bisos-core/bisos-pip/_nodeBase_")][ =bisos-pip= ]] *|* [[elisp:(blee:bnsm:panel-goto "//bisos/panels/bisos-core/_nodeBase_")][ =bisos-core= ]] *|* [[elisp:(blee:bnsm:panel-goto "//bisos/panels/_nodeBase_")][ = /<panels>/ = ]] *|* [[elisp:(dired "//bisos")][ ~bisos~ ]] *|*
 *                                   _━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━_                          [[elisp:(org-shifttab)][<)]] E|
 ####+END
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :title "Overview and Use Cases" :anchor "Panel" :extraInfo "  /::Blank Starting Point::/"

@@ -90,7 +90,7 @@ from pathlib import Path
 
 from bisos.capability import cba_seed
 from bisos.capability import cbm_csu
-from bisos.capability import cba_sysd_csu
+from bisos.capability import cba_sysd_seed
 
 from bisos.basics import pathPlus
 
@@ -129,14 +129,18 @@ def examples_csu_cba(
 
     cs.examples.menuChapter(f'= Process load/binsPrep/Assemble/Materialize The CBS=')
 
-    cmnd('cbs_load',  args="", comment=f" # remove cbs from sys/cbm")
-    cmnd('cbs_binsPrep',  args="", comment=f" # install cbs in sys/cbm")
-    cmnd('cbs_assemble',  args="", comment=f" # remove cbs from sys/cbm")
-    cmnd('cbs_materialize',  args="", comment=f" # remove cbs from sys/cbm")
+    cmnd('cbs_load',  args="", comment=f" # Identify The Loader")
+    cmnd('cbs_binsPrep',  args="", comment=f" # Execute the binsPrep script of seeded")
+    cmnd('cbs_assemble',  args="", comment=f" # Execute assemble script of seeded")
+    cmnd('cbs_isMaterialized',  args="", comment=f" # Is the capability running?")
+    cmnd('cbs_materialize',  args="", comment=f" # Materialize the Specification")
+    cmnd('cbs_reMaterialize',  args="", comment=f" # Enable + Materialize")
+    cmnd('cbs_unMaterialize',  args="", comment=f" # Undo the Materialization of CBS")
+    cmnd('cbs_deMaterialize',  args="", comment=f" # Disable + UnMaterialize")
 
     cs.examples.menuChapter(f'= Capability Specification Type=')
 
-    cmnd('cbs_type',  args="", comment=f" # ")
+    cmnd('cbs_type',  args="", comment=f" # One of: systemd perfSystemd swPkg")
 
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "CmndSvcs" :anchor ""  :extraInfo "Command Services Section"
 """ #+begin_org
@@ -279,28 +283,66 @@ class cbs_type(cs.Cmnd):
 
         return cmndOutcome.set(opResults=cba_seed.cbaSeedInfo.seedType)
 
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_materialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_isMaterialized" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_materialize>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_isMaterialized>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
 #+end_org """
-class cbs_materialize(cs.Cmnd):
+class cbs_isMaterialized(cs.Cmnd):
     cmndParamsMandatory = [ ]
     cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 1, 'Max': 1,}
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
 
     @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
     def cmnd(self,
              rtInv: cs.RtInvoker,
              cmndOutcome: b.op.Outcome,
-             argsList: typing.Optional[list[str]]=None,  # CsArgs
     ) -> b.op.Outcome:
 
         failed = b_io.eh.badOutcome
         callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
             return failed(cmndOutcome)
-        cmndArgsSpecDict = self.cmndArgsSpec()
+####+END:
+        if self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
+        #+end_org """): return(cmndOutcome)
+
+        cbsType = cba_seed.cbaSeedInfo.seedType
+
+        result = None
+
+        if cbsType == 'systemd':
+            unitNames = cba_sysd_seed.sysdSeedInfo.sysdUnitNames()
+            for unitName in unitNames:
+                if b.subProc.WOpW(invedBy=self, log=0).bash(
+                        f""" systemctl is-active {unitName}""",
+                ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+                result = cmndOutcome.stdout
+        else:
+            raise ValueError(f"Bad Usage -- Unsupported cbsType={cbsType}")
+
+        return cmndOutcome.set(opResults=result)
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_materialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_materialize>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class cbs_materialize(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
 ####+END:
         if self.cmndDocStr(f""" #+begin_org
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
@@ -323,11 +365,107 @@ class cbs_materialize(cs.Cmnd):
                         f"""{G_myFullName} -i sysdUnitsProc ensure all""",
                 ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
 
-
-
             print("Blank materialize")
 
         return cmndOutcome.set(opResults=materialize)
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_reMaterialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_reMaterialize>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class cbs_reMaterialize(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+####+END:
+        if self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
+        #+end_org """): return(cmndOutcome)
+
+        outcome = cbmSymlinkToThisCbs().pyCmnd(argsList=["enable"])
+        if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
+
+        outcome = cbs_materialize().pyCmnd(argsList=[""])
+        if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
+
+        return cmndOutcome.set(opResults=None)
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_unMaterialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_unMaterialize>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class cbs_unMaterialize(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+####+END:
+        if self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
+        #+end_org """): return(cmndOutcome)
+
+        print(f"Place holder for cbs_unMaterialize -- invoke in seeded perhaps.")
+
+        return cmndOutcome.set(opResults=None)
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_deMaterialize" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_deMaterialize>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class cbs_deMaterialize(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+####+END:
+        if self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
+        #+end_org """): return(cmndOutcome)
+
+        outcome = cbs_unMaterialize().pyCmnd(argsList=[""])
+        if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
+
+        outcome = cbmSymlinkToThisCbs().pyCmnd(argsList=["disable"])
+        if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
+
+
+
+        return cmndOutcome.set(opResults=None)
+
+
 
 
 ####+BEGIN: b:py3:cs:func/typing :funcName "examples_csu_cbmSymlinkToThisCbs" :funcType "eType" :retType "" :deco "default" :argsList ""
