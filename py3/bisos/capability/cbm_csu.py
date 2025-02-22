@@ -153,7 +153,7 @@ def examples_csu(
         cmnd('processCbs', args=f"report {eachCbs}", comment=f"")
         cmnd('processCbs', args=f"report", wrapper=f"echo {eachCbs}",  comment=f"")
         cmnd('processCbs', args=f"load {eachCbs}", comment=f"")
-        cmnd('processCbs', args=f"binsPrep {eachCbs}", comment=f"")
+        cmnd('processCbs', args=f"sbom {eachCbs}", comment=f"")
         cmnd('processCbs', args=f"assemble {eachCbs}", comment=f"")
         if cbsSeedType == "systemd":
             cmnd('processCbs', args=f"sysdEnsure {eachCbs}", comment=f"")
@@ -336,7 +336,7 @@ This pattern is called listOfArgs subject to Action.
             elif action == "load":
                 runCbs(eachCbs, action)
 
-            elif action == "binsPrep":
+            elif action == "sbom":
                 runCbs(eachCbs, action)
 
             elif action == "assemble":
@@ -377,7 +377,7 @@ This pattern is called listOfArgs subject to Action.
         cmndArgsSpecDict.argsDictAdd(
             argPosition="0",
             argName="action",
-            argChoices=['report', 'load', 'binsPrep', 'assemble', 'materialize'],
+            argChoices=['report', 'load', 'sbom', 'assemble', 'materialize'],
             argDescription="Action to be specified by rest"
         )
         cmndArgsSpecDict.argsDictAdd(

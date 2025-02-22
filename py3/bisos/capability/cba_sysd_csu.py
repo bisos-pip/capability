@@ -28,7 +28,7 @@
 ####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
 """ #+begin_org
 * *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
-** This File: /bisos/git/bxRepos/bisos-pip/binsprep/py3/bisos/binsprep/seedIf.py
+** This File: /l/pip/capability/py3/bisos/capability/cba_sysd_csu.py
 ** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
 #+end_org """
 ####+END:
@@ -38,10 +38,10 @@
 * *[[elisp:(org-cycle)][| Particulars-csInfo |]]*
 #+end_org """
 import typing
-csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['seedIf'], }
-csInfo['version'] = '202409222401'
+csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['cba_sysd_csu'], }
+csInfo['version'] = '202502211321'
 csInfo['status']  = 'inUse'
-csInfo['panel'] = 'seedIf-Panel.org'
+csInfo['panel'] = 'cba_sysd_csu-Panel.org'
 csInfo['groupingType'] = 'IcmGroupingType-pkged'
 csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
 ####+END:
@@ -293,7 +293,7 @@ f"""{subject.seededCs} -i sysdSysUnit ensure""",
         cmndArgsSpecDict.argsDictAdd(
             argPosition="0",
             argName="action",
-            argChoices=['report', 'load', 'binsPrep', 'assemble', 'materialize'],
+            argChoices=['report', 'load', 'sbom', 'assemble', 'materialize'],
             argDescription="Action to be specified by rest"
         )
         cmndArgsSpecDict.argsDictAdd(

@@ -29,7 +29,7 @@
 ####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
 """ #+begin_org
 * *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
-** This File: /bisos/git/bxRepos/bisos-pip/binsprep/py3/bin/seedBinsPrep.cs
+** This File: /l/pip/capability/py3/bin/cba-sysd.cs
 ** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
 #+end_org """
 ####+END:
@@ -39,10 +39,10 @@
 * *[[elisp:(org-cycle)][| Particulars-csInfo |]]*
 #+end_org """
 import typing
-csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['seedBinsPrep'], }
-csInfo['version'] = '202409222227'
+csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['cba-sysd'], }
+csInfo['version'] = '202502215746'
 csInfo['status']  = 'inUse'
-csInfo['panel'] = 'seedBinsPrep-Panel.org'
+csInfo['panel'] = 'cba-sysd-Panel.org'
 csInfo['groupingType'] = 'IcmGroupingType-pkged'
 csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
 ####+END:

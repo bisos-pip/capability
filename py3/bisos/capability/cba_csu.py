@@ -28,7 +28,7 @@
 ####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
 """ #+begin_org
 * *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
-** This File: /bisos/git/bxRepos/bisos-pip/binsprep/py3/bisos/binsprep/seedIf.py
+** This File: /l/pip/capability/py3/bisos/capability/cba_csu.py
 ** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
 #+end_org """
 ####+END:
@@ -38,10 +38,10 @@
 * *[[elisp:(org-cycle)][| Particulars-csInfo |]]*
 #+end_org """
 import typing
-csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['seedIf'], }
-csInfo['version'] = '202409222401'
+csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['cba_csu'], }
+csInfo['version'] = '202502210347'
 csInfo['status']  = 'inUse'
-csInfo['panel'] = 'seedIf-Panel.org'
+csInfo['panel'] = 'cba_csu-Panel.org'
 csInfo['groupingType'] = 'IcmGroupingType-pkged'
 csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
 ####+END:
@@ -127,10 +127,10 @@ def examples_csu_cba(
     cmnd = cs.examples.cmndEnter
     literal = cs.examples.execInsert
 
-    cs.examples.menuChapter(f'= Process load/binsPrep/Assemble/Materialize The CBS=')
+    cs.examples.menuChapter(f'= Process load/sbom/Assemble/Materialize The CBS=')
 
     cmnd('cbs_load',  args="", comment=f" # Identify The Loader")
-    cmnd('cbs_binsPrep',  args="", comment=f" # Execute the binsPrep script of seeded")
+    cmnd('cbs_sbom',  args="", comment=f" # Execute the sbom script of seeded")
     cmnd('cbs_assemble',  args="", comment=f" # Execute assemble script of seeded")
     cmnd('cbs_isMaterialized',  args="", comment=f" # Is the capability running?")
     cmnd('cbs_materialize',  args="", comment=f" # Materialize the Specification")
@@ -182,11 +182,11 @@ class cbs_load(cs.Cmnd):
 
         return cmndOutcome.set(opResults=loader)
 
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_binsPrep" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_sbom" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_binsPrep>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<cbs_sbom>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
 #+end_org """
-class cbs_binsPrep(cs.Cmnd):
+class cbs_sbom(cs.Cmnd):
     cmndParamsMandatory = [ ]
     cmndParamsOptional = [ ]
     cmndArgsLen = {'Min': 1, 'Max': 1,}
@@ -208,16 +208,16 @@ class cbs_binsPrep(cs.Cmnd):
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Add myFullName to the cbm directory with a symlink
         #+end_org """): return(cmndOutcome)
 
-        binsPrep = cba_seed.cbaSeedInfo.binsPrep
-        if binsPrep is not None:
+        sbom = cba_seed.cbaSeedInfo.sbom
+        if sbom is not None:
             if b.subProc.WOpW(invedBy=self, log=1).bash(
-                f"""{binsPrep} -i sbom_fullUpdate""",
+                f"""{sbom} -i sbom_fullUpdate""",
             ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
 
         else:
-            print("Blank binsPrep")
+            print("Blank sbom")
 
-        return cmndOutcome.set(opResults=binsPrep)
+        return cmndOutcome.set(opResults=sbom)
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "cbs_assemble" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
 """ #+begin_org
@@ -352,7 +352,7 @@ class cbs_materialize(cs.Cmnd):
         if materialize is not None:
             print(f"materialize = {materialize} -- We should execute that function or script.")
         else:
-            outcome = cbs_binsPrep().pyCmnd(argsList=[""])
+            outcome = cbs_sbom().pyCmnd(argsList=[""])
             if outcome.isProblematic():  return(b_io.eh.badOutcome(outcome))
 
             outcome = cbs_assemble().pyCmnd(argsList=[""])

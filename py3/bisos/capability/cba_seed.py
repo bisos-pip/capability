@@ -28,7 +28,7 @@
 ####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
 """ #+begin_org
 * *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
-** This File: /bisos/git/bxRepos/bisos-pip/binsprep/py3/bisos/binsprep/binsprep.py
+** This File: /bisos/git/bxRepos/bisos-pip/sbom/py3/bisos/sbom/sbom.py
 ** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
 #+end_org """
 ####+END:
@@ -38,10 +38,10 @@
 * *[[elisp:(org-cycle)][| Particulars-csInfo |]]*
 #+end_org """
 import typing
-csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['binsprep'], }
+csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['sbom'], }
 csInfo['version'] = '202409221313'
 csInfo['status']  = 'inUse'
-csInfo['panel'] = 'binsprep-Panel.org'
+csInfo['panel'] = 'sbom-Panel.org'
 csInfo['groupingType'] = 'IcmGroupingType-pkged'
 csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
 ####+END:
@@ -111,14 +111,14 @@ class CbaSeedInfo(object):
             self,
             seedType: str | None =None,
             loader: str | None =None,
-            binsPrep: str | None =None,
+            sbom: str | None =None,
             assemble: str | None =None,
             materialize: str | None =None,
             examplesHook: typing.Callable | None =None,
     ):
         self._seedType = seedType
         self._loader = loader
-        self._binsPrep = binsPrep
+        self._sbom = sbom
         self._assemble = assemble
         self._materialize = materialize
         self._examplesHook = examplesHook
@@ -140,12 +140,12 @@ class CbaSeedInfo(object):
         self._loader = value
 
     @property
-    def binsPrep(self) -> str | None:
-        return self._binsPrep
+    def sbom(self) -> str | None:
+        return self._sbom
 
-    @binsPrep.setter
-    def binsPrep(self, value: str | None,):
-        self._binsPrep = value
+    @sbom.setter
+    def sbom(self, value: str | None,):
+        self._sbom = value
 
     @property
     def assemble(self) -> str | None:
@@ -191,7 +191,7 @@ def setup(
 ####+END:
         seedType: str | None = None,
         loader: str | None = None,
-        binsPrep: str | None = None,
+        sbom: str | None = None,
         assemble: str | None = None,
         materialize: str | None = None,
         examplesHook: typing.Callable | None = None,
@@ -201,7 +201,7 @@ def setup(
     #+end_org """
     cbaSeedInfo.seedType = seedType
     cbaSeedInfo.loader = loader
-    cbaSeedInfo.binsPrep = binsPrep
+    cbaSeedInfo.sbom = sbom
     cbaSeedInfo.assemble = assemble
     cbaSeedInfo.materialize = materialize
     cbaSeedInfo.examplesHook  = examplesHook
