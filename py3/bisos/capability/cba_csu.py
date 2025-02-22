@@ -211,7 +211,7 @@ class cbs_binsPrep(cs.Cmnd):
         binsPrep = cba_seed.cbaSeedInfo.binsPrep
         if binsPrep is not None:
             if b.subProc.WOpW(invedBy=self, log=1).bash(
-                f"""{binsPrep} -i binsPrep_fullUpdate""",
+                f"""{binsPrep} -i sbom_fullUpdate""",
             ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
 
         else:
