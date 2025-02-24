@@ -7,7 +7,7 @@
 
 |----------------------+------------------------------------------------------------------|
 | ~Blee Panel Controls~: | [[elisp:(show-all)][Show-All]] : [[elisp:(org-shifttab)][Overview]] : [[elisp:(progn (org-shifttab) (org-content))][Content]] : [[elisp:(delete-other-windows)][(1)]] : [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] : [[elisp:(save-buffer)][Save]]  : [[elisp:(kill-buffer)][Quit]]  : [[elisp:(bury-buffer)][Bury]] |
-| ~Panel Links~:         | [[file:./py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]]                                                  |
+| ~Panel Links~:         | [[file:./py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]] --  [[file:/bisos/git/auth/bxRepos/bisos-pip/capability/py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Blee Panel]]                                                |
 | ~See Also~:            | [[https://pypi.org/project/bisos.capability][At PYPI]] : [[https://github.com/bisos-pip/pycs][bisos.PyCS]]                                             |
 |----------------------+------------------------------------------------------------------|
 

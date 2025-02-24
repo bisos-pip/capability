@@ -61,7 +61,7 @@
 *  -) _d_     == Data Object -- Materialization includes a dedicated BPO in addition to Platform-BPO
 *  -) _o_     == PBS Object -- Materialization is based on specified (Portable ByStar Service) PBS-BPO
 *  -) _u_     == Usage Object -- Materialization is based on specified UsgEnv-BPO
-*  -) _p_     == Platform    -- Materialization is based on Platform-BPO
+*  -) _p_     == Platform    -- Materialization is based on Platform-BPO (Site-BPO -s not used)
 *  -) _s_     == Site        -- Materialization is based on Site-BPO in addition to Platform-BPO
 * ---
 * <<CapabilityType>>:   Type of Capability -- Usually refering to  cbMater-{[[CapabilityType]]}-niche.cs
@@ -75,7 +75,7 @@
 * Materialization starts always in the context of the Platform-BPO but additional BPOs can also be relevant.
 * For example the data of a DNS server is contained along with the Capability Bundle.
 * ---
-* Capability Meterialization is done with the bisos.capMater package.
+* Capability Materialization is done with the bisos.capMater package.
 *  /capMater Specification Files/ (Capability Bundle Materialization Specification File)  resides in the
 * sys/cap repo of BPO-Platform. The ~bpo/sys/cap/cbMaterManage.cs (similar to ~bpo/sys/bin/cntnrAssemble.sh).
 * ---

@@ -245,6 +245,25 @@ def setup(
     sysdSeedInfo.sysdUnitsList  = sysdUnitsList
     sysdSeedInfo.examplesHook  = examplesHook
 
+ ####+BEGIN: b:py3:cs:func/typing :funcName "plantWithWhich" :funcType "extTyped" :comment "expects seedSbom.cs" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /plantWithWhich/  expects seedSbom.cs deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def plantWithWhich(
+####+END:
+        asExpected: str,
+) -> None:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ] The globals() in exec(code, globals()) is important.
+    #+end_org """
+
+    if asExpected != 'cba-sysd.cs':
+        b_io.pr(f"plantWithWhich Expected cba-sysd.cs Got: {asExpected}")
+        return
+
+    b.importFile.plantWithWhich('cba-sysd.cs')
+
 
 ####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
 """ #+begin_org
