@@ -10,7 +10,7 @@
 **  [[elisp:(bap:magit:bisos:current-bpo-repos/visit)][BPO-Repos-Magit]] ||
 **  [[elisp:(blee:buf:re-major-mode)][Re-Major-Mode]] ||  [[elisp:(org-dblock-update-buffer-bx)][Update Buf Dblocks]] || [[elisp:(org-dblock-bx-blank-buffer)][Blank Buf Dblocks]] || [[elisp:(bx:panel:variablesShow)][bx:panel:variablesShow]]
 **  [[elisp:(blee:menu-sel:comeega:maintenance:popupMenu)][||Maintenance]]
-**  This File :: *= /bisos/panels/bisos-core/bisos-pip/bisos.capability/_nodeBase_/fullUsagePanel-en.org =*
+**  This File :: *= /bisos/panels/bisos-core/capability/bisos.capability/_nodeBase_/fullUsagePanel-en.org =*
 * /file-truename:/  /bisos/git/auth/bxRepos/bisos-pip/capability/py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org
 *  [[elisp:(org-cycle)][|#Select|]]  :: (Results: [[elisp:(blee:bnsm:results-here)][Here]] | [[elisp:(blee:bnsm:results-split-below)][Below]] | [[elisp:(blee:bnsm:results-split-right)][Right]] | [[elisp:(blee:bnsm:results-other)][Other]] | [[elisp:(blee:bnsm:results-popup)][Popup]]) (Select:  [[elisp:(lsip-local-run-command "lpCurrentsAdmin.sh -i currentsGetThenShow")][Show Currents]]  [[elisp:(lsip-local-run-command "lpCurrentsAdmin.sh")][lpCurrentsAdmin.sh]] ) [[elisp:(org-cycle)][| ]]
 **  #See:  (Window: [[elisp:(blee:bnsm:results-window-show)][?]] | [[elisp:(blee:bnsm:results-window-set 0)][0]] | [[elisp:(blee:bnsm:results-window-set 1)][1]] | [[elisp:(blee:bnsm:results-window-set 2)][2]] | [[elisp:(blee:bnsm:results-window-set 3)][3]] ) || [[elisp:(lsip-local-run-command-here "echo pushd dest")][echo pushd dir]] || [[elisp:(lsip-local-run-command-here "lsf")][lsf]] || [[elisp:(lsip-local-run-command-here "pwd")][pwd]] |
@@ -38,7 +38,7 @@
 * [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Overview and Use Cases:* |]] <<Panel>>   /::Blank Starting Point::/  [[elisp:(org-shifttab)][<)]] E|
 ####+END
 ** +
-** Capability Bundled -- Abstraction (cba) -- Specification (cbs) and Materialization (cbm)
+** Capability Bundles -- Abstraction (cba) -- Specification (cbs) and Materialization (cbm)
 ** -B|
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "bisos.capability IMPLEMENTATION PLAN" :anchor "" :extraInfo ""
 * /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
@@ -58,8 +58,10 @@
 *  5) _mvds_   == A Mail Vir Dom Service (eg mailto:main@1.mohsen.banan.byname.net) --- /Complete Mail Service/
 * ---
 * <<BpoQualifier>>:  MaterializedCapabilityFormQualifier
-*  -) _d_     == Data Object -- Materialization includes a dedicated BPO in addition to Platform-BPO
+*  -) _n_     == No Data     -- Materialization is purely based on Realm-BPO
+*  -) _d_     == Data Object -- Materialization includes a dedicated BPO or BPOs in addition to Realm-BPO
 *  -) _o_     == PBS Object -- Materialization is based on specified (Portable ByStar Service) PBS-BPO
+* <<BpoRealm>>: 
 *  -) _u_     == Usage Object -- Materialization is based on specified UsgEnv-BPO
 *  -) _p_     == Platform    -- Materialization is based on Platform-BPO (Site-BPO -s not used)
 *  -) _s_     == Site        -- Materialization is based on Site-BPO in addition to Platform-BPO
