@@ -34,11 +34,68 @@
 *   /Ancestors/  :: [[elisp:(blee:bnsm:panel-goto "//bisos/panels/bisos-core/bisos-pip/_nodeBase_")][ =bisos-pip= ]] *|* [[elisp:(blee:bnsm:panel-goto "//bisos/panels/bisos-core/_nodeBase_")][ =bisos-core= ]] *|* [[elisp:(blee:bnsm:panel-goto "//bisos/panels/_nodeBase_")][ = /<panels>/ = ]] *|* [[elisp:(dired "//bisos")][ ~bisos~ ]] *|*
 *                                   _━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━_                          [[elisp:(org-shifttab)][<)]] E|
 ####+END
-####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :title "Overview and Use Cases" :anchor "Panel" :extraInfo "  /::Blank Starting Point::/"
-* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Overview and Use Cases:* |]] <<Panel>>   /::Blank Starting Point::/  [[elisp:(org-shifttab)][<)]] E|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :title "Overview and Use Cases" :anchor "Panel" :extraInfo "  /::Cap Bundle {Abstraction, Specification, Materialization}::/"
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Overview and Use Cases:* |]] <<Panel>>   /::Cap Bundle {Abstraction, Specification, Materialization}::/  [[elisp:(org-shifttab)][<)]] E|
 ####+END
 ** +
 ** Capability Bundles -- Abstraction (cba) -- Specification (cbs) and Materialization (cbm)
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "Capability Bundle Abstraction (cba)" :anchor "" :extraInfo "  /::The Seed::/"
+* /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Capability Bundle Abstraction (cba):* |]]    /::The Seed::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** For example in facter cbs, cba-sysd.cs, cba_sysd_seed, cba_seed
+** cba_seed is part of  bisos.capability
+** Other cba seeds (eg cba-sysd.cs) can be part of other packages
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep nil :title "Capability Bundle Specification (cbs)" :anchor "" :extraInfo "  /::Planted::/"
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Capability Bundle Specification (cbs):* |]]    /::Planted::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** For example in facter: [[file:/bisos/git/auth/bxRepos/bisos-pip/facter/py3/bin/facter-cbs-is-np-sysd.cs]]
+** --- Summary Begin
+** from bisos.capability import cba_sysd_seed
+** from bisos.capability import cba_seed
+** ... cba_sysd_seed.sysdUnit("facter", "facter-roPerf-sysd.cs")
+** cba_sysd_seed.plantWithWhich("cba-sysd.cs")
+** --- Summary End
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep nil :title "Capability Bundle Materialization (cbm)" :anchor "" :extraInfo "  /::List of CBS to be Materialized::/"
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Capability Bundle Materialization (cbm):* |]]    /::List of CBS to be Materialized::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** List of CBS-es operated on with bisos.capability
+** These are typically in  [[file:/bisos/platform/sys/cbm/]]
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "Self Contained Services (scs)" :anchor "" :extraInfo "  /::BXO with cbs-es and Data::/"
+* /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Self Contained Services (scs):* |]]    /::BXO with cbs-es and Data::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** When the CBS needs to have its own data, eg DHCP Capability or DNS Capability, then
+** Data and Capability Specification are packaged in a BXO.
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep nil :title "ByStar Service Instace (si)" :anchor "" :extraInfo "  /::BXO with cbs-es for Virtualized Domains::/"
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *ByStar Service Instace (si):* |]]    /::BXO with cbs-es for Virtualized Domains::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** Similar to SCS, plus ByStar Domain Virtualization
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep nil :title "Possesion Assertable Libre Services (PALS&PAAI)" :anchor "" :extraInfo "  /::BXO: -> to CBS, SCS and SI-s::/"
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Possesion Assertable Libre Services (PALS&PAAI):* |]]    /BXO: -> to CBS, SCS and SI-s/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** A set of related capabilities that can be materialized
+** PALS also include Possesion Assertable Autonomous Identity (PAAI)
+** PAAI-Framework + domainName + registrations + PALSs
+** When PALS are of ByStar Service (eg ByName), it is called (Portable ByStar Service) PBS-BPO
+** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep nil :title "Platform PALS" :anchor "" :extraInfo "  /::List of PALS of a Platform::/"
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Platform PALS:* |]]    /::List of PALS of a Platform::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** Typically in [[file:/bisos/platform/palsList]]
 ** -B|
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "bisos.capability IMPLEMENTATION PLAN" :anchor "" :extraInfo ""
 * /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
@@ -47,24 +104,27 @@
 ** +
 ** -B|
 * +
-* SEE /bisos/git/auth/bxRepos/blee-binders/capabilities/materializationLayers/_nodeBase_/fullUsagePanel-en.org
+* SEE [[file:/bisos/panels/bisos-core/capability/_nodeBase_/fullUsagePanel-en.org]]
+* ------------------
 * =BISOS Capability Bundles= are facilities that provide for augmentation of BPO-Platforms.
 * Capability Bundles can be /Materialized/. The Meterialized Capability can be in the form of
 * <<MaterializedCapabilityForm>>:
 *  1) _be_     == A BISOS Enhancement (Emacs 30 for Deb 12) Think of these as /Optional Feature/
 *  2) _ue_     == A Usage Enhancement (eg LCNT, MARMEE) --- Think of These As /Apps/
 *  3) _is_     == An Independent Service (eg DHCP) --- /Service Component/
+*  3.1 _dvwis_ == Domain Virtualizer Web Independent Service (NGINX)
+*  3.2 _dvmis_ == Domain Virualizer Mail Independent Service (QMAIL)
 *  4) _wvds_   == A Web Vir Dom Service (eg https://1.mohsen.banan.byname.net)  --- /Complete Web Service/
 *  5) _mvds_   == A Mail Vir Dom Service (eg mailto:main@1.mohsen.banan.byname.net) --- /Complete Mail Service/
 * ---
 * <<BpoQualifier>>:  MaterializedCapabilityFormQualifier
 *  -) _n_     == No Data     -- Materialization is purely based on Realm-BPO
 *  -) _d_     == Data Object -- Materialization includes a dedicated BPO or BPOs in addition to Realm-BPO
-*  -) _o_     == PBS Object -- Materialization is based on specified (Portable ByStar Service) PBS-BPO
+*  -) _o_     == PBS Object  -- Materialization is based on specified (Portable ByStar Service) PBS-BPO
 * <<BpoRealm>>: 
-*  -) _u_     == Usage Object -- Materialization is based on specified UsgEnv-BPO
-*  -) _p_     == Platform    -- Materialization is based on Platform-BPO (Site-BPO -s not used)
-*  -) _s_     == Site        -- Materialization is based on Site-BPO in addition to Platform-BPO
+*  -) _u_     == Usage Object  -- Materialization is based on specified UsgEnv-BPO
+*  -) _p_     == Platform      -- Materialization is based on Platform-BPO (Site-BPO -s not used)
+*  -) _s_     == Site          -- Materialization is based on Site-BPO in addition to Platform-BPO
 * ---
 * <<CapabilityType>>:   Type of Capability -- Usually refering to  cbMater-{[[CapabilityType]]}-niche.cs
 * ---
@@ -72,20 +132,21 @@
 * ---
 * Capability Bundles can contain other Capability Bundles. For example a web virdom service contains indipendent services
 * ---
-* Capability Bundles are Applicable to Network Abodes. For example, you can only run a VPN service in the Exposed-Rim.
+* Capability Bundles are Applicable to Network Abodes. For example, you can ONLY run a VPN service in the Exposed-Rim.
 * ---
 * Materialization starts always in the context of the Platform-BPO but additional BPOs can also be relevant.
 * For example the data of a DNS server is contained along with the Capability Bundle.
 * ---
-* Capability Materialization is done with the bisos.capMater package.
+* Capability Materialization is done with the bisos.capMater package. (NOTYET, is that in bisos.capability)
 *  /capMater Specification Files/ (Capability Bundle Materialization Specification File)  resides in the
-* sys/cap repo of BPO-Platform. The ~bpo/sys/cap/cbMaterManage.cs (similar to ~bpo/sys/bin/cntnrAssemble.sh).
+* sys/cbm repo of BPO-Platform. The ~bpo/sys/cap/cbMaterManage.cs (similar to ~bpo/sys/bin/cntnrAssemble.sh).
 * ---
-* Naming convention for /capMater Specification Files/ is as follows:
-*     cbMater-{[[MaterializedCapabilityForm]]}-{[[BpoQualifier]]}-{[[CapabilityType]]}-{[[CapabilityParticular]]}-niche.cs
-* Example   cbMater-is-o-geneweb-simpsonFamily-niche.cs
+* Naming convention for /Capability Bundle Specification files/ (cbs) is as follows:
+*     {cbName}-cbs-{[[MaterializedCapabilityForm]]}-{[[CapabilityType]]}-{[[CapabilityParticular]]}.cs
+* Example: facter-cbs-is-np-sysd.cs
+* Old Example   cbMater-is-o-geneweb-simpsonFamily-niche.cs
 * ---
-* Execution of /capMater Specification Files/ results in:
+* Materialization (execution) of cbs files results in:
 *  Indication of activation in:   /bisos/var/cap/cbMater-is-o-geneweb-simpsonFamily-niche.cs/fileParameter
 *  Indication of activation in:   /bisos/log/cap/cbMater-is-o-geneweb-simpsonFamily-niche.cs/dateTag
 *      ==============  _Implementation Layers  bisos.capability_  ==================
