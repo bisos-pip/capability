@@ -37,7 +37,7 @@
 ** Overview Comes Here.
 ** -B|
 * +
-* See /bisos/git/auth/bxRepos/blee-binders/capabilities/_nodeBase_/fullUsagePanel-en.org
+* See [[file:/bisos/git/auth/bxRepos/blee-binders/bisos-core/capability/_nodeBase_/fullUsagePanel-en.org]]
 * -
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "Capability Materialization Layers" :anchor "" :extraInfo "TABULAR"
 * /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
