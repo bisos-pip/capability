@@ -40,6 +40,12 @@
 ** +
 ** Capability Bundles -- Abstraction (cba) -- Specification (cbs) and Materialization (cbm)
 ** -B|
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "Platform Reconstruction, PALS and PAAI" :anchor "" :extraInfo "  /::::/"
+* /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
+* [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Platform Reconstruction, PALS and PAAI:* |]]    /::::/  [[elisp:(org-shifttab)][<)]] E|
+####+END
+** +
+** -B|
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep t :title "Capability Bundle Abstraction (cba)" :anchor "" :extraInfo "  /::The Seed::/"
 * /[[elisp:(beginning-of-buffer)][|^]]  [[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]] [[elisp:(delete-other-windows)][|1]]/
 * [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *Capability Bundle Abstraction (cba):* |]]    /::The Seed::/  [[elisp:(org-shifttab)][<)]] E|
@@ -75,6 +81,7 @@
 ** +
 ** When the CBS needs to have its own data, eg DHCP Capability or DNS Capability, then
 ** Data and Capability Specification are packaged in a BXO.
+** Example: pmz_dhcpStatic-privA
 ** -B|
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 1 :sep nil :title "ByStar Service Instace (si)" :anchor "" :extraInfo "  /::BXO with cbs-es for Virtualized Domains::/"
 * [[elisp:(show-all)][(>]]  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_  _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_       [[elisp:(outline-show-subtree+toggle)][| *ByStar Service Instace (si):* |]]    /::BXO with cbs-es for Virtualized Domains::/  [[elisp:(org-shifttab)][<)]] E|

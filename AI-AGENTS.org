@@ -1,0 +1,46 @@
+#+title: AI Agents Guidance for aNewRepo
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+It is usually sourced from CLAUDE.md
+
+* Table of Contents     :TOC:
+- [[#ai-collaboration-workflow][AI Collaboration Workflow]]
+- [[#general-aspects-of-this-package][General Aspects of This Package]]
+- [[#development-status-and-continuation-of-development][Development Status and Continuation of Development]]
+- [[#work-plan][Work Plan]]
+- [[#project-overview][Project Overview]]
+- [[#specific-commands-and-python-programming-and-testing][Specific Commands and Python Programming and Testing]]
+
+* AI Collaboration Workflow
+
+See [[file:./AI-Workflow.org]] for Mohsen's overall AI collaborative development workflow.
+
+@./AI-Workflow.org
+
+* General Aspects of This Package
+
+See [[file:./AI-GENERAL.org]] for details.
+
+@./AI-GENERAL.org
+
+
+* Development Status and Continuation of Development
+
+Current state of development is at: [[file:./AI-DevStatus.org]]
+
+@./AI-DevStatus.org
+
+* Work Plan
+
+AI collaborative developemnt uses [[file:./AI-WorkPlan.org]]
+
+@./AI-WorkPlan.org
+
+* Project Overview
+
+NOTYET: Ask Claude to fill this in after you have copied this file to the new repo.
+
+
+* Specific Commands and Python Programming and Testing
+
+NOTYET: Per project specifics

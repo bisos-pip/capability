@@ -1,0 +1,56 @@
+#+title: Capabilities Improvement for airflow.here --- Work Plan
+#+DATE: <2026-06-10 Wed 13:54>
+#+AUTHOR: Mohsen BANAN
+#+OPTIONS: toc:4
+#+TAGS: me(m) ai(a)
+
+This Work Plan file drives the AI collaborative development.
+Interactions are broken down into "Stages". Each Stage has a set
+of TODOs that I work with Claude to accomplish.
+
+Companion docs: [[file:AI-AGENTS.org][AI-AGENTS.org]] (agent guidance / layering), [[file:README.org][README.org]] (overview).
+
+* Stage 1 TODOs
+** +
+** TODO [#A] Add <<use of banna>> by airflow-webservice-sysd.pcs
+SCHEDULED: <2026-06-28 Sun 15:22>
+Extract port number from bisos.banna package.
+----- AI Results: ------
+** TODO [#A] Add a new <<etcHostsHere>> Cmnd in bisos-pip/banna to be used in /etc/hosts dblock
+SCHEDULED: <2026-06-28 Sun 15:22>
+The airflow line will be like -- 127.0.100.5  airflow.here
+----- AI Results: ------
+** TODO [#A] Add a new <<etcHostsDblockUpdate>> Cmnd in bisos-pip/banna run dblock update on /etc/hosts
+SCHEDULED: <2026-06-28 Sun 15:22>
+The airflow line will be like -- 127.0.100.5  airflow.here
+----- AI Results: ------
+** TODO [#C] Add a <<DNS>> .pcs that for here runs dblock on /etc/hosts
+SCHEDULED: <2026-06-28 Sun 15:22>
+Make it generalized, so that it is an expected step in pbsi process
+----- AI Results: ------
+** TODO [#A] Run <<airflow-cbs>>  and make sure that all 3 systemd s are running
+SCHEDULED: <2026-06-28 Sun 15:22>
+Hit 24005 http port and see that airflow is up.
+----- AI Results: ------
+** TODO [#A] Add to <<bisos.weCap a new seed>> for web vir dom service that adds the nginx config file
+SCHEDULED: <2026-06-28 Sun 15:22>
+Use airflow for testing
+----- AI Results: ------
+** TODO [#A] Create a new <<wvds .pcs for airflow>>
+SCHEDULED: <2026-06-28 Sun 15:22>
+Inputs are going to be airflow.here and the port number can come from banna in this case
+----- AI Results: ------
+** TODO [#A] <<End-to-end Test>> of  http://airflow.here
+SCHEDULED: <2026-06-28 Sun 15:22>
+Final test of all of the above
+----- AI Results: ------
+** -
+
+* Stage 1: Addition of Airflow as a here web vir dom service to rawBisos
+
+Goal: Fully implement it so that it can be idempotently triggered from bro_rawBisos_pbsi-here
+
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# eval: (setq-local org-log-done 'time)
+# End:

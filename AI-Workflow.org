@@ -1,0 +1,65 @@
+#+title: AI-Workflow --- Mohsen's Collaborative AI Development Workflow
+#+DATE: <2026-06-10 Wed 13:54>
+#+AUTHOR: Mohsen BANAN
+#+OPTIONS: toc:4
+#+TAGS: me(m) ai(a)
+
+This is an overview of my collaborative AI development workflow. It is
+generalized and not specific to any particular activity. I use it for
+developing and updating documents, books and presentations (usually with LaTeX),
+software development in Python and elisp or even short notes like this one.
+
+For each of those activities I maintain a set of starting point templates.
+My workflow is mostly the same for starting a new project or extending an existing project.
+
+In my case, I use Claude inside of emacs (with claude-code.el) and assume that
+org-mode is available. Most org-mode features are also available in VSCode
+through the Org-vscode extension --- but I don't use that much (emacs is of
+course much better). I use org-mode heavily for its mark-down, outlining,
+cross-referencing, TODO-lists, agenda, scheduling and archiving capabilities. I
+use the TODOs list feature to assign tasks to AI (Claude) and to myself. After
+completing the task, I ask Claude to summarize it, mark it as done and archive
+it.
+
+Here is a list of the AI collaboration files that I maintain for each project/repo.
+The third column is one of: const(constant), ai, you, u+ai --- which says who produces the file.
+
+|--------------------+------------------------------------------------------------------+-------|
+| ./CLAUDE.md        | Default for Claude, imports ./AI-AGENTS.org to enable org-mode   | const |
+|--------------------+------------------------------------------------------------------+-------|
+| ./AI-AGENTS.org    | Master for importing everything else and describing the project  | u+ai  |
+|                    | It imports ./AI-GENERAL.org, ./AI-DevStatus.org,                 |       |
+|                    | ./AI-WorkPlan.org and  ./AI-WorkPlan-archive.org                 |       |
+|--------------------+------------------------------------------------------------------+-------|
+| ./AI-Workflow.org  | A description of this workflow, for the AI-Assistant's benefit.  | const |
+|--------------------+------------------------------------------------------------------+-------|
+| ./AI-GENERAL.org   | Here I keep all of my activity related preferences,              | you   |
+|                    | For example, for python; use type hints                          |       |
+|--------------------+------------------------------------------------------------------+-------|
+| ./AI-DevStatus.org | After every major interaction, I ask Claude to update this with  | ai    |
+|                    | details of what it has understood and where the project stands   |       |
+|                    | This allows me (or others) to continue the work on a different   |       |
+|                    | machine (which does not have Claude's memory)                    |       |
+|--------------------+------------------------------------------------------------------+-------|
+| ./AI-WorkPlan.org  | This is where I drive the project.                               | u+ai  |
+|                    | I break down my interactions into "Stages". Each Stage has a set |       |
+|                    | of TODOs that I work with Claude to accomplish.                  |       |
+|--------------------+------------------------------------------------------------------+-------|
+| ./xx.org_archive   | From time to time I move Done subtrees to org archive files.     | u+ai  |
+|--------------------+------------------------------------------------------------------+-------|
+
+
+This is all about establishing a precise, evolving and maintainable long-context.
+
+These are the very early days of our interactions with LLM-AI. We need to
+experiment, learn and share our experiences.
+
+I'd be interested in your feedback and knowing about your own AI workflow experiences.
+
+Here is where I keep my AI Templates for bisos:
+https://github.com/bisos/defaults/tree/master/ai-templates/bisos-pip
+Here is an example of an AI Collaborative project at bisos.gitist: https://github.com/bisos-pip/gitist
+
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# End:
