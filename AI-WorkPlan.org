@@ -2,7 +2,7 @@
 #+DATE: <2026-06-10 Wed 13:54>
 #+AUTHOR: Mohsen BANAN
 #+OPTIONS: toc:4
-#+TAGS: me(m) ai(a)
+#+TAGS: me ai aiAndMe
 
 This Work Plan file drives the AI collaborative development.
 Interactions are broken down into "Stages". Each Stage has a set
@@ -16,7 +16,7 @@ Companion docs: [[file:AI-AGENTS.org][AI-AGENTS.org]] (agent guidance / layering
 SCHEDULED: <2026-06-28 Sun 15:22>
 Extract port number from bisos.banna package.
 ----- AI Results: ------
-** TODO [#A] Add a new <<etcHostsHere>> Cmnd in bisos-pip/banna to be used in /etc/hosts dblock
+** TODO [#A] Add a new <<etcHostsHere>> Cmnd in bisos-pip/banna to be used in /etc/hosts dblock :ai:
 SCHEDULED: <2026-06-28 Sun 15:22>
 The airflow line will be like -- 127.0.100.5  airflow.here
 ----- AI Results: ------
