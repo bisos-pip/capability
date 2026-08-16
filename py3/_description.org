@@ -5,8 +5,87 @@
 
 * Overview
 
-bisos.capability is a python package for BISOS Capabilities Bundles -- Abstraction, Specification and
-Materialization.
+bisos.capability is the python package for BISOS *Capability Bundles*.
+A BISOS capability is a complete piece of functionality (a systemd
+service + its packages + its DNS entry + its nginx vhost, or a
+non-service software induction like LaTeX+LCNT) declared once and
+materialized in one shot on a target host.
+
+The package covers a three-way triad of abstractions --- CBA at the
+bottom (the framework, this pip package), CBS in the middle (one
+=-cbs.pcs= executable per capability), CBM at the top (one
+=cbmProc.spcs= planted per capability leaf). CBM subprocess-invokes
+CBS at materialization time and does *not* duplicate CBS content.
+
+
+Each of the three tiers in detail:
+
+- *CBA* --- Capability Bundle /Abstraction/. The framework layer.
+  Provides =cba_seed.py= (base CBS singleton), =cba_sysd_seed.py=
+  (flavor extension for systemd services), =cba_csu.py= (the =cbs_*=
+  verb family: =cbs_load=, =cbs_sbom=, =cbs_assemble=, =cbs_materialize=,
+  =cbs_reMaterialize=, =cbs_unMaterialize=, =cbs_deMaterialize=,
+  =cbs_type=, =cbs_isMaterialized=).
+
+- *CBS* --- Capability Bundle /Specification/. A standalone executable
+  =-cbs.pcs= file that declares one capability's contents. Uses
+  =cba_seed.setup(seedType=..., sbom=..., ...)= and (for services)
+  =cba_sysd_seed.setup(sysdUnitsList=[...])=. Invocable as
+  =./foo-cbs.pcs -i cbs_materialize= to install / configure / start
+  the whole capability. Example: =/bisos/asc/web/bin/airflow-cbs.pcs=.
+
+- *CBM* --- Capability Bundle /Materialization/. A =cbmProc.spcs=
+  planted at a leaf of the CBM tree
+  (=sys/cbm/<realm>/<capabilityType>/<capability>/=), gated by a
+  sibling =cbmProc.control= file. *Points to* a CBS via =cbsSpec=;
+  does NOT duplicate CBS content. When materialized, subprocess-invokes
+  the CBS. Provides the =cbm_*= verb family:
+
+  - =cbm_control= / =cbm_status= / =cbm_isEnabled= --- read state
+  - =cbm_enable= / =cbm_disable= / =cbm_available= --- write state
+    (gate manipulation; never gated themselves)
+  - =cbm_materialize= / =cbm_reMaterialize= / =cbm_unMaterialize= /
+    =cbm_sbom= --- gated; subprocess-invoke =<cbsSpec> -i cbs_<verb>=
+
+*Load-bearing principle: CBM sits on top of CBS. It does not
+duplicate CBS content.* A =cbmProc.spcs= is a ~10-line pointer file
+(=capabilityName= + =cbsSpec=); the actual CBS content lives in the
+referenced =-cbs.pcs= executable and stays put.
+
+** Files in this package
+
+Framework (existing; ship as-is, don't edit):
+
+- =cba_seed.py= --- =CbaSeedInfo= singleton + =setup()=
+- =cba_sysd_seed.py= --- =SysdUnit=, =SysdSeedInfo=, sysd flavor
+- =cba_csu.py= --- =cbs_*= verb classes
+- =cba_sysd_csu.py= --- =sysdUnitsProc=
+- =cbm_csu.py= --- =cbmBase=, =processCbs=
+
+CBM machinery (additive, non-invasive to the above):
+
+- =cbmProc_seedInfo.py= --- =CbmProcSeedInfo= singleton,
+  =ControlState= enum (=available=/=enabled=/=disabled=),
+  =paramsFromPlantPath()=, =controlRead/Write=, =statusRead/Write=,
+  =resolveCbsSpec()=, =leafProcessorNames()=, =walkExamples()=
+- =cbmProc_seed.py= --- atexit registrar for =cbmProc-seed.cs=
+- =cbmProc_csu.py= --- =cbm_*= Cmnd classes + =_dispatchCbs()= helper
+- =bin/cbmProc-seed.cs= --- the CBM-aware seed CSXU
+
+** Canonical exemplar
+
+Airflow at
+=/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/webHere/airflow/=
+--- three-file CBM leaf pointing to =airflow-cbs.pcs=.
+See [[file:/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/README.org][bro_rawBisosPlatform/README.org]] for the realm/capabilityType
+layering.
+
+** Tests
+
+=py3/tests/verify.sh= --- 54-assertion smoke suite covering the
+singleton, Cmnd class presence, control/status roundtrips,
+paramsFromPlantPath, walkExamples coverage, and =cbsSpec= resolution
+across absolute-path/slash-path/basename forms.
 
 
 
@@ -20,10 +99,16 @@ More complete documentation is available at: https://github.com/bisos-pip/capabi
 
 | bisos Capabilities Panel | file:/panels/capabilities/_nodeBase_/fullUsagePanel-en.org |
 |                          |                                                                |
+| CBM airflow exemplar     | /bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/README.org |
+| Legacy airflow CBS        | /bisos/asc/web/bin/airflow-cbs.pcs                             |
+| FTO walker (planted leaves) | /bisos/git/auth/bxRepos/bisos-pip/fileObj/                   |
 
 
 * Table of Contents     :TOC:
 - [[#overview][Overview]]
+  - [[#files-in-this-package][Files in this package]]
+  - [[#canonical-exemplar][Canonical exemplar]]
+  - [[#tests][Tests]]
 - [[#package-documentation-at-github][Package Documentation At Github]]
 - [[#realted-resources][Realted Resources]]
 - [[#installation][Installation]]
