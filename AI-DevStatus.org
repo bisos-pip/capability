@@ -46,7 +46,7 @@ CBS files.
   release predates this work.
 
 Downstream consumer: =bro_rawBisos/bro_rawBisosPlatform/sys/cbm/=
-tree. Airflow planted at =collective/webHere/airflow/= as the
+tree. Airflow planted at =collective/hereWeb/airflow/= as the
 canonical CBM leaf exemplar; walked from
 =collective/ftoBranchProc.spcs= via =bisos.fileObj='s FTO walker.
 
@@ -125,7 +125,7 @@ Verified end-to-end (2026-08-15):
 - =walkExamples()= --- returns 11 WalkExampleSpec entries covering
   both Family 1 and Family 2.
 - Airflow leaf end-to-end at
-  =bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/webHere/airflow/=:
+  =bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/hereWeb/airflow/=:
   - Bare invocation renders =cbm_*= chapters (no traceback noise).
   - Gate-closed =cbm_materialize= → skip + audit line.
   - Gate-open + unresolvable basename → clean error + audit line.

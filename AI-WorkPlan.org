@@ -356,7 +356,7 @@ create sibling =cbmProc.control= (initial =available=) and
 Not shipped as a template in =py3/bin/=. Reason: after the D4 pivot
 the "template" collapsed to ~10 lines (just =capabilityName= +
 =cbsSpec=). Plants happen directly at the destination (see e.g.
-=bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/webHere/airflow/cbmProc.spcs=).
+=bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/hereWeb/airflow/cbmProc.spcs=).
 If a template file becomes useful later, drop it in =py3/bin/=.
 
 ** TODO [#B] Wire =cbmProc-seed.cs= into =setup.py= scripts list :ai:
