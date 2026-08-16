@@ -43,9 +43,9 @@ def longDescription():
 # b:py3:pypi:setup/version Arguments  :forSys t :forPyPi t :constant "666"
 ####+BEGIN: b:py3:pypi:setup/version :comment "Auto Detected"
 
-# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.21 -- forLocalVersion=0.1 -- constant=NA
+# ./pypiUploadVer DID NOT exist -- forPypiVersion=0.22 -- forLocalVersion=0.21 -- constant=NA
 def pkgVersion():
-        return '0.1'
+        return '0.21'
 
 ####+END:
 
@@ -59,8 +59,10 @@ requires = [
 "bisos.bpo",
 "bisos.common",
 "bisos.csPlayer",
+"bisos.csSeed",
 "bisos.platform",
 "setuptools==75.8.0",
+"wheel==0.38.4",
 ]
 ####+END:
 
@@ -71,6 +73,7 @@ scripts = [
 'bin/capMaterializationDispatch.cs',
 'bin/cba-sysd.cs',
 'bin/cbm-materialize-cbs.cs',
+'bin/cbmProc-seed.cs',
 ]
 ####+END:
 
@@ -78,7 +81,7 @@ scripts = [
 ####+BEGIN: b:py3:pypi:setup/dataFiles :comment "Instead of ./MANIFEST.in or in pyproject.toml"
 
 data_files = [
-(' ',  ['lh-agpl3-LICENSE.txt', '_description.org', 'README.rst']),
+('',  ['lh-agpl3-LICENSE.txt', '_description.org', 'README.rst']),
 ]
 ####+END:
 

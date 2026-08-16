@@ -1,0 +1,211 @@
+#!/usr/bin/env python
+
+####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
+""" #+begin_org
+* *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
+** This File: /bisos/git/bxRepos/bisos-pip/capability/py3/images/capability-graphviz.pcs
+** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
+#+end_org """
+####+END:
+
+""" #+begin_org
+* Overview
+Three-tier triad figure for bisos.capability:
+
+  CBM  (Capability Bundle Materialization)   ← top
+       cbmProc.spcs planted at each leaf; pointer + gate + audit
+       │
+       │ subprocess.run([cbsSpec, "-i", "cbs_materialize"])
+       ▼
+  CBS  (Capability Bundle Specification)     ← middle
+       one -cbs.pcs executable per capability
+       │
+       │ import + plantWithWhich + run cbs_* verbs
+       ▼
+  CBA  (Capability Bundle Abstraction)       ← bottom
+       framework (this pip package)
+
+The load-bearing principle: CBM sits on top of CBS via subprocess; it
+does NOT duplicate CBS content. The arrow from CBM to CBS is the
+visual expression of that principle.
+#+end_org """
+
+from bisos import b
+from bisos.b import cs
+
+import graphviz
+
+from bisos.graphviz import graphvizSeed
+ng = graphvizSeed.namedGraph
+
+
+####+BEGIN: b:py3:cs:orgItem/basic :type "=Seed Setup= " :title "*Common Facilities*" :comment "General"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  =Seed Setup=  [[elisp:(outline-show-subtree+toggle)][||]] *Common Facilities* General  [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+namedGraphsList = [
+    # Forward reference: cbaCbsCbmTriad is defined below this block.
+    ng("cbaCbsCbmTriad",
+       func=lambda: cbaCbsCbmTriad(),
+       title="CBA / CBS / CBM Triad",
+       caption="The three-tier layering of bisos.capability. CBM at the "
+               "top --- one cbmProc.spcs per capability leaf, a thin "
+               "pointer + gate + audit log. CBS in the middle --- one "
+               "-cbs.pcs executable per capability, the actual "
+               "specification content. CBA at the bottom --- the shared "
+               "framework in this pip package. The load-bearing arrow "
+               "from CBM to CBS is a subprocess.run call: CBM sits on "
+               "top of CBS via subprocess dispatch and does NOT "
+               "duplicate CBS content."),
+]
+
+graphvizSeed.setup(
+    seedType="common",
+    namedGraphsList=namedGraphsList,
+)
+
+####+BEGIN: b:py3:cs:func/typing :funcName "cbaCbsCbmTriad" :funcType "Typed" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-Typed  [[elisp:(outline-show-subtree+toggle)][||]] /cbaCbsCbmTriad/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def cbaCbsCbmTriad(
+####+END:
+) -> graphviz.Digraph:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ]  Three vertical clusters: CBM (top),
+    CBS (middle), CBA (bottom). Top-down flow (TB rankdir) so each
+    layer's dependency on the one below reads naturally. Arrows
+    labeled with the actual mechanism: subprocess (CBM->CBS),
+    import + plantWithWhich (CBS->CBA).
+    #+end_org """
+
+    d = graphviz.Digraph()
+    d.attr(rankdir='TB')
+    d.attr(compound='true')
+    d.attr('graph', fontname='Helvetica', fontsize='11')
+    d.attr('node', fontname='Helvetica', fontsize='10')
+    d.attr('edge', fontname='Helvetica', fontsize='9')
+
+    # -----------------------------------------------------------------
+    # Semantic palette:
+    #   thistle         = CBM tier (materialization; per-capability leaf)
+    #   lightsteelblue  = CBS tier (specification; per-capability executable)
+    #   darkseagreen3   = CBA tier (framework; shared, this pip package)
+    #   note            = file on disk
+    #   folder          = directory / group
+    #   cylinder        = state file (control/status)
+    #   rarrow          = verb / dispatcher
+    # -----------------------------------------------------------------
+
+    # =================================================================
+    # Cluster: CBM  (top tier)
+    # =================================================================
+    with d.subgraph(name='cluster_cbm') as c:
+        c.attr(label='CBM  --  Capability Bundle Materialization\n(one per capability leaf; planted in the CBM tree)',
+               style='filled', fillcolor='thistle', fontsize='12',
+               labeljust='l')
+
+        # Leaf directory as container concept
+        c.node('cbm_spcs',
+               '<<b>cbmProc.spcs</b><br/>'
+               '<font point-size="9">'
+               'cbmProc_seedInfo.setup(<br/>'
+               '&nbsp;&nbsp;capabilityName="airflow",<br/>'
+               '&nbsp;&nbsp;cbsSpec="airflow-cbs.pcs",<br/>'
+               ')</font>>',
+               shape='note', style='filled', fillcolor='mistyrose')
+        c.node('cbm_control',
+               'cbmProc.control\navailable | enabled | disabled',
+               shape='cylinder', style='filled', fillcolor='lightyellow')
+        c.node('cbm_status',
+               'cbmProc.status\n(append-only audit log)',
+               shape='cylinder', style='filled', fillcolor='lightyellow')
+        c.node('cbm_verbs',
+               'cbm_* verbs\ncontrol/status + materialize',
+               shape='rarrow', style='filled', fillcolor='salmon')
+
+        # Internal wiring (constraint=false so they don't distort rank)
+        c.edge('cbm_verbs', 'cbm_control', style='dashed', arrowhead='none',
+               label='read/write', constraint='false')
+        c.edge('cbm_verbs', 'cbm_status', style='dashed', arrowhead='none',
+               label='append', constraint='false')
+        c.edge('cbm_spcs', 'cbm_verbs', style='dotted', arrowhead='none',
+               label='planted at leaf', constraint='false')
+
+    # =================================================================
+    # Cluster: CBS  (middle tier)
+    # =================================================================
+    with d.subgraph(name='cluster_cbs') as c:
+        c.attr(label='CBS  --  Capability Bundle Specification\n(one -cbs.pcs executable per capability)',
+               style='filled', fillcolor='lightsteelblue', fontsize='12',
+               labeljust='l')
+
+        c.node('cbs_file',
+               '<<b>airflow-cbs.pcs</b><br/>'
+               '<font point-size="9">'
+               'cba_seed.setup(seedType="systemd", sbom=...)<br/>'
+               'cba_sysd_seed.setup(sysdUnitsList=[...])<br/>'
+               'cba_sysd_seed.plantWithWhich("cba-sysd.cs")'
+               '</font>>',
+               shape='note', style='filled', fillcolor='azure')
+
+    # =================================================================
+    # Cluster: CBA  (bottom tier)
+    # =================================================================
+    with d.subgraph(name='cluster_cba') as c:
+        c.attr(label='CBA  --  Capability Bundle Abstraction\n(the bisos.capability pip package; shared framework)',
+               style='filled', fillcolor='darkseagreen3', fontsize='12',
+               labeljust='l')
+
+        c.node('cba_seed',
+               'cba_seed.py\nCbaSeedInfo singleton',
+               shape='note', style='filled', fillcolor='honeydew')
+        c.node('cba_sysd_seed',
+               'cba_sysd_seed.py\nSysdSeedInfo singleton\nplantWithWhich("cba-sysd.cs")',
+               shape='note', style='filled', fillcolor='honeydew')
+        c.node('cba_csu',
+               'cba_csu.py\ncbs_* verbs\n(materialize, sbom, ...)',
+               shape='rarrow', style='filled', fillcolor='lightgoldenrod1')
+        c.node('cba_sysd_csu',
+               'cba_sysd_csu.py\nsysdUnitsProc',
+               shape='rarrow', style='filled', fillcolor='lightgoldenrod1')
+
+    # =================================================================
+    # Inter-tier edges (the load-bearing arrows)
+    # =================================================================
+
+    # CBM -> CBS: the load-bearing subprocess.run edge
+    d.edge('cbm_verbs', 'cbs_file',
+           label='  subprocess.run(\n    [cbsSpec, "-i", "cbs_materialize"]\n  )  ',
+           color='purple', fontcolor='purple', penwidth='2',
+           lhead='cluster_cbs', ltail='cluster_cbm')
+
+    # CBS -> CBA: standard PyCS seeded-CS wiring
+    d.edge('cbs_file', 'cba_seed',
+           label='  import + setup()  ',
+           color='darkgreen', fontcolor='darkgreen',
+           ltail='cluster_cbs')
+    d.edge('cbs_file', 'cba_sysd_seed',
+           label='  plantWithWhich("cba-sysd.cs")  ',
+           color='darkgreen', fontcolor='darkgreen')
+
+    # CBS -> CBA cbs_* dispatch (when the CBS is invoked with -i cbs_materialize)
+    d.edge('cbs_file', 'cba_csu',
+           label='  cbs_* verb dispatch  ',
+           color='navy', fontcolor='navy', style='dashed')
+
+    return d
+
+
+####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
+""" #+begin_org
+* [[elisp:(org-cycle)][| *End-Of-Editable-Text* |]] :: emacs and org variables and control parameters
+#+end_org """
+####+END:
+
+### local variables:
+### no-byte-compile: t
+### end:

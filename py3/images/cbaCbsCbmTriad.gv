@@ -1,0 +1,46 @@
+digraph {
+	rankdir=TB
+	compound=true
+	graph [fontname=Helvetica fontsize=11]
+	node [fontname=Helvetica fontsize=10]
+	edge [fontname=Helvetica fontsize=9]
+	subgraph cluster_cbm {
+		fillcolor=thistle fontsize=12 label="CBM  --  Capability Bundle Materialization
+(one per capability leaf; planted in the CBM tree)" labeljust=l style=filled
+		cbm_spcs [label=<<b>cbmProc.spcs</b><br/><font point-size="9">cbmProc_seedInfo.setup(<br/>&nbsp;&nbsp;capabilityName="airflow",<br/>&nbsp;&nbsp;cbsSpec="airflow-cbs.pcs",<br/>)</font>> fillcolor=mistyrose shape=note style=filled]
+		cbm_control [label="cbmProc.control
+available | enabled | disabled" fillcolor=lightyellow shape=cylinder style=filled]
+		cbm_status [label="cbmProc.status
+(append-only audit log)" fillcolor=lightyellow shape=cylinder style=filled]
+		cbm_verbs [label="cbm_* verbs
+control/status + materialize" fillcolor=salmon shape=rarrow style=filled]
+		cbm_verbs -> cbm_control [label="read/write" arrowhead=none constraint=false style=dashed]
+		cbm_verbs -> cbm_status [label=append arrowhead=none constraint=false style=dashed]
+		cbm_spcs -> cbm_verbs [label="planted at leaf" arrowhead=none constraint=false style=dotted]
+	}
+	subgraph cluster_cbs {
+		fillcolor=lightsteelblue fontsize=12 label="CBS  --  Capability Bundle Specification
+(one -cbs.pcs executable per capability)" labeljust=l style=filled
+		cbs_file [label=<<b>airflow-cbs.pcs</b><br/><font point-size="9">cba_seed.setup(seedType="systemd", sbom=...)<br/>cba_sysd_seed.setup(sysdUnitsList=[...])<br/>cba_sysd_seed.plantWithWhich("cba-sysd.cs")</font>> fillcolor=azure shape=note style=filled]
+	}
+	subgraph cluster_cba {
+		fillcolor=darkseagreen3 fontsize=12 label="CBA  --  Capability Bundle Abstraction
+(the bisos.capability pip package; shared framework)" labeljust=l style=filled
+		cba_seed [label="cba_seed.py
+CbaSeedInfo singleton" fillcolor=honeydew shape=note style=filled]
+		cba_sysd_seed [label="cba_sysd_seed.py
+SysdSeedInfo singleton
+plantWithWhich(\"cba-sysd.cs\")" fillcolor=honeydew shape=note style=filled]
+		cba_csu [label="cba_csu.py
+cbs_* verbs
+(materialize, sbom, ...)" fillcolor=lightgoldenrod1 shape=rarrow style=filled]
+		cba_sysd_csu [label="cba_sysd_csu.py
+sysdUnitsProc" fillcolor=lightgoldenrod1 shape=rarrow style=filled]
+	}
+	cbm_verbs -> cbs_file [label="  subprocess.run(
+    [cbsSpec, \"-i\", \"cbs_materialize\"]
+  )  " color=purple fontcolor=purple lhead=cluster_cbs ltail=cluster_cbm penwidth=2]
+	cbs_file -> cba_seed [label="  import + setup()  " color=darkgreen fontcolor=darkgreen ltail=cluster_cbs]
+	cbs_file -> cba_sysd_seed [label="  plantWithWhich(\"cba-sysd.cs\")  " color=darkgreen fontcolor=darkgreen]
+	cbs_file -> cba_csu [label="  cbs_* verb dispatch  " color=navy fontcolor=navy style=dashed]
+}

@@ -1,16 +1,241 @@
 #+title: Development Status & Continuation Handoff
-#+TAGS: me(m) ai(a)
+#+TAGS: me ai aiAndMe
+
+# Provenance (installed once by aiActivity.cs --- not regenerated):
+#   Date:      2026-08-15T14:56:23-07:00
+#   User:      bystar
+#   Templates: /bisos/apps/defaults/ai-templates
+#   Command:   /bisos/venv/py3/devbin/aiActivity.cs -i initiate --activity=bisos-pip
+
+####+BEGIN: b:ai:file/particulars
+* AI Working Context
+  Working Directory: /bisos/git/auth/bxRepos/bisos-pip/capability
+  File: /bisos/git/auth/bxRepos/bisos-pip/capability/AI-DevStatus.org
+  Activity: bisos-pip
+  Companion Docs: AI-WORKFLOW.org, AI-Activity.org, AI-DevStatus.org, README.org
+####+END:
 
 This file is a working-state handoff so development can continue on another
 machine (which has this repo but NOT the developer's =~=). It captures the
 architecture, what works, what is untested and the design decisions made so far.
 
-This file is to be maintained by Claude. When a release is being made, claude should be
-prompted to update this document.
+This file is maintained by Claude. Updates are typically triggered by the
+=/bx-update-status= slash command, after major interactions, or before a release.
 
-Companion docs: [[file:AI-AGENTS.org][AI-AGENTS.org]] (agent guidance / layering), [[file:README.org][README.org]] (overview).
+Note to a fresh Claude: this file is intentionally sparse at project start.
+Fill in the sections below when asked to update, following the structure provided.
 
+* Current State
 
+=bisos.capability= has been extended (non-invasively) with CBM
+(Capability Bundle Materialization) machinery. As of 2026-08-15, four
+new files under =py3/bisos/capability/= and =py3/bin/= implement a
+pointer-based CBM layer on top of the pre-existing CBA framework +
+CBS files.
+
+- Framework (existing, ship as-is, NEVER edit): =cba_seed.py=,
+  =cba_sysd_seed.py=, =cba_csu.py=, =cba_sysd_csu.py=, =cbm_csu.py=,
+  =bin/cba-sysd.cs=, =bin/capMaterializationDispatch.cs=,
+  =bin/cbm-materialize-cbs.cs=.
+- CBM machinery (added this session, additive-only):
+  =cbmProc_seedInfo.py=, =cbmProc_seed.py=, =cbmProc_csu.py=,
+  =bin/cbmProc-seed.cs=.
+- Tests: =py3/tests/verify.sh= --- 54 assertions, 0 failures.
+- Package is =pip install -e='d locally.
+- PyPI release: NOT yet made for the CBM additions. Existing 0.12
+  release predates this work.
+
+Downstream consumer: =bro_rawBisos/bro_rawBisosPlatform/sys/cbm/=
+tree. Airflow planted at =collective/webHere/airflow/= as the
+canonical CBM leaf exemplar; walked from
+=collective/ftoBranchProc.spcs= via =bisos.fileObj='s FTO walker.
+
+* Architecture
+
+** Three-way triad: CBA / CBS / CBM
+
+- *CBA* = Capability Bundle Abstraction --- the framework layer.
+  Provides the =cbs_*= verb family and singletons (=CbaSeedInfo=,
+  =SysdSeedInfo=) that CBS files populate.
+- *CBS* = Capability Bundle Specification --- a standalone executable
+  =-cbs.pcs= file (e.g. =/bisos/asc/web/bin/airflow-cbs.pcs=)
+  declaring one specific capability's contents (seedType + sbom +
+  sysd units + ...). Invocable directly:
+  =./airflow-cbs.pcs -i cbs_materialize=.
+- *CBM* = Capability Bundle Materialization --- a =cbmProc.spcs=
+  planted at a CBM tree leaf. Contains only a *pointer* to the CBS
+  (=capabilityName= + =cbsSpec=) and delegates to the CBS via
+  subprocess. Gated by a sibling =cbmProc.control= file.
+
+Load-bearing principle: *CBM sits on top of CBS; it does not
+duplicate CBS content.*
+
+** CBM leaf anatomy
+
+Three files at =sys/cbm/<realm>/<capabilityType>/<capabilityName>/=:
+
+- =cbmProc.spcs= (executable) --- 10-line pointer file with
+  =cbmProc_seedInfo.setup(capabilityName=..., cbsSpec=...)=.
+- =cbmProc.control= --- plain-text single-word: =available=,
+  =enabled=, or =disabled=. Not JSON.
+- =cbmProc.status= --- append-only timestamped log of skip / run /
+  failure events.
+
+** Two verb families in =cbmProc_csu.py=
+
+Family 1 --- Control/Status (never gated):
+=cbm_control=, =cbm_status=, =cbm_isEnabled=, =cbm_enable=,
+=cbm_disable=, =cbm_available=.
+
+Family 2 --- Materialize (gated; subprocess-dispatch):
+=cbm_materialize=, =cbm_reMaterialize=, =cbm_unMaterialize=,
+=cbm_sbom=. Each delegates to shared =_dispatchCbs(verb)= helper:
+1. controlRead --- if not =Enabled=, write skip to status, return.
+2. resolveCbsSpec --- absolute (has =/= or =~=) → use as-is;
+   basename → =shutil.which=. ValueError on unresolvable.
+3. =subprocess.run([cbsExec, '-i', verb], check=False)=.
+4. Write outcome to status.
+
+** Composition without modification
+
+=cbmProc-seed.cs='s csuList: =csxuFps_csu=, =cba_csu=, =cba_sysd_csu=,
+=cbmProc_csu=, =plantedCsu=. Composes the pre-existing =cbs_*= surface
+with the new =cbm_*= surface. No edits to any =cba_*.py= file.
+
+The gate lives in each Family-2 Cmnd's body (via
+=controlRead(plantDir)=), NOT in the seed's =__main__=. This is a
+deliberate correction from an earlier design that used =sys.exit(0)=
+in =__main__= --- that produced =SystemExit: 0= traceback noise.
+
+* What Works
+
+Verified end-to-end (2026-08-15):
+
+- =py3/tests/verify.sh= --- 54/54 PASS.
+- Singleton + setup(): =CbmProcSeedInfo= accepts =capabilityName=,
+  =cbsSpec=, =examplesFuncsList=.
+- =controlRead/Write=, =statusRead/Write= roundtrip via scratch
+  =tempfile.TemporaryDirectory=. Absent-file default = =Available=.
+  Unknown-value fallback = =Available= (no raise).
+- =paramsFromPlantPath()= --- resolves plant path to leaf directory;
+  falls back capabilityName to leaf dir name if =setup()= didn't set it.
+- =resolveCbsSpec()= --- three forms (absolute, path-with-slash,
+  basename-via-PATH) + two error forms (nonexistent absolute, missing
+  basename, unset singleton).
+- =walkExamples()= --- returns 11 WalkExampleSpec entries covering
+  both Family 1 and Family 2.
+- Airflow leaf end-to-end at
+  =bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/webHere/airflow/=:
+  - Bare invocation renders =cbm_*= chapters (no traceback noise).
+  - Gate-closed =cbm_materialize= → skip + audit line.
+  - Gate-open + unresolvable basename → clean error + audit line.
+  - Gate-open + absolute path → subprocess to =airflow-cbs.pcs -i cbs_materialize=;
+    reaches =cba_csu.cbs_materialize=; internal =airflow-sbom.pcs=
+    fails at 127 (container has no =/bisos/asc/web/bin= on PATH).
+- Walker discovers airflow via =leafProcessorNames() = ['cbmProc.spcs']=.
+  =fto_forwardToLeaves --cmndName=cbm_*= verified for status/enable/
+  materialize across the =collective/= subtree.
+
+* What Is Untested
+
+- *Real materialization on a VM.* Everything above stops at
+  =airflow-cbs.pcs='s inner sbom step because the container lacks the
+  target PATH. Full materialization (systemd units brought up +
+  airflow.here DNS + nginx vhost + webserver listening on 24006)
+  requires a VM host. Deferred to VM-based validation.
+
+- *Blee panel.* =py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org=
+  has not been updated to describe the CBM additions. WorkPlan #B.
+
+- *=setup.py= scripts wiring for =cbmProc-seed.cs=.* Regenerated by
+  =pypiProc.sh=. Not verified this session. WorkPlan #B.
+
+- *No PyPI release with the CBM additions.* Existing 0.12 release
+  predates this work. When ready, run =pypiProc.sh -i fullPrep= +
+  =fullPrepBuild forPypi= per the =bisos-pip-release= skill.
+
+* Key Design Decisions
+
+** CBM as a pointer, not a duplicator (load-bearing)
+
+The =cbmProc.spcs= at a CBM leaf is a *pointer* to the CBS executable,
+not a re-declaration of the CBS. Original design (D4 in WorkPlan)
+had the .spcs inline =cba_seed.setup(...)= + =cba_sysd_seed.setup(...)=;
+that duplicated content already in =airflow-cbs.pcs=. Corrected:
+=.spcs= contains =capabilityName= + =cbsSpec= only; materialization
+subprocess-invokes the CBS. Rationale:
+- No in-process CBS loading (no =runpy=, =importlib= tricks, no
+  monkey-patching =plantWithWhich=).
+- =airflow-cbs.pcs= stays unmodified.
+- CBS in any language (bash, Go, etc.) becomes possible later --- CBM
+  just execs it.
+- Layering matches the vocabulary: CBM literally sits on top of CBS
+  as a subprocess launcher.
+
+** Gate in Cmnd body, not in =__main__=
+
+Original plan had the control gate in =cbmProc-seed.cs='s =__main__=
+before =g_csMain=, with =sys.exit(0)= on skip. That produced
+=SystemExit: 0= traceback noise. Corrected: each Family-2 Cmnd's body
+calls =controlRead(plantDir)= and short-circuits via
+=cmndOutcome.set(opError=Success, opResults="skipped: ...")=. Family-1
+verbs (=cbm_enable= etc.) bypass naturally since they don't call
+=_dispatchCbs()=.
+
+** =cbsSpec= resolution: absolute-or-basename (both, deliberately)
+
+- Contains =/= or starts with =~= → treat as explicit path
+  (=.resolve()= for symlinks, require exists). Use to *pin* a specific
+  location.
+- Bare basename → =shutil.which($PATH)=. Use for portability.
+
+Both supported so users can choose per-deployment. Absolute for lock-in
+(when the CBS location matters); basename for portability (when
+deployment puts the CBS on PATH).
+
+** Non-invasive rule
+
+=cba_csu.py=, =cba_seed.py=, =cba_sysd_seed.py=, =cba_sysd_csu.py=,
+=cbm_csu.py= (the pre-existing file, distinct from the new
+=cbmProc_csu.py=) ship as-is. Never edit. CBM adds machinery by
+composition (csuList in =cbmProc-seed.cs=), not modification.
+
+** =cba_sysd_seed.plantWithWhich()= workaround
+
+The pre-existing =cba_sysd_seed.plantWithWhich()= is hardcoded to
+accept only =cba-sysd.cs= as its argument (line ~261). Any other value
+silently returns without planting. This means a naive
+=cbmProc.spcs= calling
+=cba_sysd_seed.plantWithWhich("cbmProc-seed.cs")= would fail
+silently.
+
+Workaround (in use, no modification): =cbmProc.spcs= imports
+=cbmProc_seed= (a 6-line atexit registrar that calls
+=seedsLib.plantWithWhich('cbmProc-seed.cs')=). Bypasses
+=cba_sysd_seed.plantWithWhich= entirely. Modernizing
+=cba_sysd_seed.plantWithWhich()= to accept arbitrary seed names is
+deferred.
+
+** =cbmProc.control= / =cbmProc.status= are plain-text, NOT JSON
+
+Explicit design decision. Current format: single-word for =.control=
+(=available= / =enabled= / =disabled=); append-log with ISO timestamp
++ one-line message for =.status=. If richer state emerges, promote
+the accessors (=controlRead/Write=, =statusRead/Write=) to a more
+structured format without changing caller code (they deal in
+=ControlState= enum values, not raw strings).
+
+** Known limitation: g_csMain exit-code propagation
+
+=bisos.b.cs.main.g_csMain= exits 0 even when a Cmnd raises. Result:
+subprocess =rc= from a CBS may be 0 despite an inner failure, and
+=cbmProc.status= may log =ran: <verb> ok= incorrectly. This is a
+=bisos.b= issue affecting many downstream consumers (also flagged in
+=bisos.fileObj= Stage 2 #C). Do NOT work around locally.
+
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# End:
 
 # Local Variables:
 # eval: (setq-local toc-org-max-depth 4)
