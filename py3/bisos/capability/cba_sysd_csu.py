@@ -263,6 +263,12 @@ f"""{subject.seededCs} -i sysdSysUnit ensure""",
             else:
                 return failed(cmndOutcome)
 
+        if len(listOfSubject) == 0:
+            return cmndOutcome.set(
+                opError=b.op.OpError.Success,
+                opResults="Empty List of Subjects -- Processing Skipped",
+            )
+
         if len(listOfSubject) == 0 and len(methodInvokeArg.splitlines()) == 0:
             return failed(cmndOutcome)
 
