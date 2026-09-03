@@ -75,7 +75,7 @@ CBM machinery (additive, non-invasive to the above):
 ** Canonical exemplar
 
 Airflow at
-=/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/webHere/airflow/=
+=/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/hereWeb/airflow/=
 --- three-file CBM leaf pointing to =airflow-cbs.pcs=.
 See [[file:/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/README.org][bro_rawBisosPlatform/README.org]] for the realm/capabilityType
 layering.

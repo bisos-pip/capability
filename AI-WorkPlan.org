@@ -461,6 +461,24 @@ resolves to =dash= via symlink); fixed the assertion.
 
 ** -
 
+* Stage 3: Development of sysCbmManage.cs
+
+Goal: Once Everything is in place sysCbmManage.cs is used to observe and manage this
+System's capabilities. At image creation time, sysCbmManage.cs is used to triggered
+Materialization of all relevant Capability Bundles.
+
+** Stage 2 TODOs
+** +
+** TODO [#A] Develoe a first cut of sysCbmManage.cs
+It needs to include the following features
+- sysCbmManage.cs -i fullUpdate
+- Take realms as parameters.
+- Report on Available vs Enabled capabilities.
+----- AI Results: ------
+
+
+
+
 * Known Limitations Carried Forward
 
 - *g_csMain exit-code propagation.* =bisos.b.cs.main.g_csMain= currently

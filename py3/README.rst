@@ -84,7 +84,7 @@ Canonical exemplar
 ------------------
 
 Airflow at
-``/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/webHere/airflow/``
+``/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/hereWeb/airflow/``
 — three-file CBM leaf pointing to ``airflow-cbs.pcs``. See
 `bro\ rawBisosPlatform/README.org </bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/README.org>`__
 for the realm/capabilityType layering.
