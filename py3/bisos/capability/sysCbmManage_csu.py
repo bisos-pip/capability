@@ -218,15 +218,21 @@ This pattern is called listOfArgs subject to Action.
 :
         #+end_org """)
 
-        if b.subProc.WOpW(invedBy=self, cd="/bisos/platform/sys/cbm/collective", log=1).bash(
+        # NOTYET  Problem, When it walk down to hereWeb -- it does not respect orderedBranches
+        # walkRoot = "/bisos/platform/sys/cbm/collective"
+
+        # Short Term Workaround
+        walkRoot = "/bisos/platform/sys/cbm/collective/hereWeb"
+
+        if b.subProc.WOpW(invedBy=self, cd=walkRoot, log=1).bash(
             f"""echo Capability Materialization Started in $(pwd) at $(date)""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
-        if b.subProc.WOpW(invedBy=self, cd="/bisos/platform/sys/cbm/collective", log=1).bash(
+        if b.subProc.WOpW(invedBy=self, cd=walkRoot, log=1).bash(
             f"""ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='cbm_status'""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
-        if b.subProc.WOpW(invedBy=self, cd="/bisos/platform/sys/cbm/collective", log=1).bash(
+        if b.subProc.WOpW(invedBy=self, cd=walkRoot, log=1).bash(
             f"""ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='cbm_materialize'""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
