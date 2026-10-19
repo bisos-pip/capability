@@ -50,6 +50,19 @@ tree. Airflow planted at =collective/hereWeb/airflow/= as the
 canonical CBM leaf exemplar; walked from
 =collective/ftoBranchProc.spcs= via =bisos.fileObj='s FTO walker.
 
+2026-10-19 (for bisos.pals's pals realm; uncommitted) --- planned in
+=bro_rawBisos/bro_rawBisosPals/bySmb/libreHalaalFoundation/web/astro/AI-WorkPlan.org= 2.5:
+- =sysCbmManage_csu.cbmDispatch= (=fullyMaterialize=) also walks =/bisos/platform/sys/cbm/pals=, after
+  =collective/hereWeb= (nginx, Node), when that realm's =ftoBranchProc.spcs= exists (bisos.pals's
+  =palsOfSys.cs -i palsLeavesPlant= plants it and the leaves =pals/<palsBxo>/<cbm>/=). It calls
+  =./ftoBranchProc.spcs=; the existing hereWeb lines still call it bare (AI-Outputs TODO).
+- Defect fixed in =cbmProc_seedInfo.resolveCbsSpec()=: =.resolve()= followed symlinks, so a leaf ran a
+  symlinked, spread-planted CBS as its target and the CBS lost where it is planted (seen with a PALS's
+  =cbm/pals-cbs.spcs=). Now =.absolute()= in both forms; leaves pointing at real files are unchanged
+  (kafka checked). AI-Outputs entry (DONE).
+- On the dev host this package was the PyPI 0.23 copy, not editable; it is now =pip install -e= from
+  this repo (the repo differed only by =sysCbmManage_csu.py= and this fix).
+
 * Architecture
 
 ** Three-way triad: CBA / CBS / CBM
@@ -185,8 +198,8 @@ verbs (=cbm_enable= etc.) bypass naturally since they don't call
 ** =cbsSpec= resolution: absolute-or-basename (both, deliberately)
 
 - Contains =/= or starts with =~= → treat as explicit path
-  (=.resolve()= for symlinks, require exists). Use to *pin* a specific
-  location.
+  (=.absolute()=, require exists; NOT =.resolve()= since 2026-10-19: a symlinked CBS must run by the
+  path it is planted at). Use to *pin* a specific location.
 - Bare basename → =shutil.which($PATH)=. Use for portability.
 
 Both supported so users can choose per-deployment. Absolute for lock-in
@@ -231,7 +244,9 @@ structured format without changing caller code (they deal in
 subprocess =rc= from a CBS may be 0 despite an inner failure, and
 =cbmProc.status= may log =ran: <verb> ok= incorrectly. This is a
 =bisos.b= issue affecting many downstream consumers (also flagged in
-=bisos.fileObj= Stage 2 #C). Do NOT work around locally.
+=bisos.fileObj= Stage 2 #C). Do NOT work around locally. Seen 2026-10-19: two failed runs of
+=/bisos/platform/sys/cbm/pals/bro_rawBisosPals/libreHalaal/= logged "ran: cbs_materialize ok" and
+the walk reported =failed=0=.
 
 # Local Variables:
 # eval: (setq-local toc-org-max-depth 4)

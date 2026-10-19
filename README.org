@@ -83,6 +83,14 @@ CBM machinery (additive, non-invasive to the above):
 - =cbmProc_seed.py= --- atexit registrar for =cbmProc-seed.cs=
 - =cbmProc_csu.py= --- =cbm_*= Cmnd classes + =_dispatchCbs()= helper
 - =bin/cbmProc-seed.cs= --- the CBM-aware seed CSXU
+- =sysCbmManage_csu.py=, =bin/sysCbmManage.cs= --- =fullyMaterialize=: =cbm_status= then
+  =cbm_materialize= over the platform's tree --- =collective/hereWeb=, then the =pals= realm
+  (=sys/cbm/pals/<palsBxo>/<cbm>/=, planted by bisos.pals's =palsOfSys.cs=) when it has a
+  =ftoBranchProc.spcs=
+
+An explicit =cbsSpec= path is used as planted, not resolved: a CBS that is a symlink to a generic,
+spread-planted file (a PALS site's =cbm/pals-cbs.spcs=) runs by its own path, which is how it finds its
+parameters.
 
 ** Canonical exemplar
 

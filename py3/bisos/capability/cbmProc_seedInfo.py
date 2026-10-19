@@ -170,8 +170,10 @@ def resolveCbsSpec(cbsSpec: str | None = None) -> pathlib.Path:
 
     if '/' in cbsSpec or cbsSpec.startswith('~'):
         # Explicit path form (absolute or relative-with-slash or ~).
-        # Expand ~ and resolve; require it to exist.
-        resolved = pathlib.Path(cbsSpec).expanduser().resolve()
+        # Expand ~ and make absolute, but do NOT follow symlinks: a spread-planted CBS (e.g. a PALS's
+        # cbm/pals-cbs.spcs -> bisos.pals's generic one) takes its parameters from where it is planted,
+        # so it must run by the path it is planted at. Require it to exist.
+        resolved = pathlib.Path(cbsSpec).expanduser().absolute()
         if not resolved.exists():
             raise ValueError(
                 f"cbsSpec {cbsSpec!r} resolved to {resolved} which does not exist."
@@ -185,7 +187,7 @@ def resolveCbsSpec(cbsSpec: str | None = None) -> pathlib.Path:
             f"cbsSpec {cbsSpec!r} not found on PATH. Either add its directory "
             f"to PATH or use an absolute path in setup(cbsSpec=...)."
         )
-    return pathlib.Path(onPath).resolve()
+    return pathlib.Path(onPath).absolute()   # not resolved: see the explicit-path form above
 
 
 ###############################################################################

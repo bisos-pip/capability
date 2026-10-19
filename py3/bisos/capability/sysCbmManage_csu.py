@@ -81,6 +81,7 @@ from bisos.common import csParam
 import collections
 ####+END:
 
+import os
 import subprocess
 # import time
 
@@ -235,6 +236,17 @@ This pattern is called listOfArgs subject to Action.
         if b.subProc.WOpW(invedBy=self, cd=walkRoot, log=1).bash(
             f"""ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='cbm_materialize'""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
+
+        # Then the pals realm: the CBM leaves bisos.pals plants from each PALS-BXO's declarations
+        # (palsOfSys.cs -i palsLeavesPlant). After collective/hereWeb, which brings nginx and Node; so
+        # platform.here's snapshot, taken last in hereWeb, shows the pals leaves' previous outcome.
+        # ./ftoBranchProc.spcs: this realm's own branch file, not one found on PATH.
+        palsRoot = "/bisos/platform/sys/cbm/pals"
+        if os.path.isfile(os.path.join(palsRoot, "ftoBranchProc.spcs")):
+            for cmndName in ('cbm_status', 'cbm_materialize'):
+                if b.subProc.WOpW(invedBy=self, cd=palsRoot, log=1).bash(
+                    f"""./ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='{cmndName}'""",
+                ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
