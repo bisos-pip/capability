@@ -63,6 +63,27 @@ canonical CBM leaf exemplar; walked from
 - On the dev host this package was the PyPI 0.23 copy, not editable; it is now =pip install -e= from
   this repo (the repo differed only by =sysCbmManage_csu.py= and this fix).
 
+2026-11-04 (nothing in this repo's code changed; findings and a hand-run) --- see AI-WorkPlan.org Stage 4:
+- =sysCbmManage.cs -i fullyMaterialize= was run on this host (Debian 13, Python 3.13, Node 20). The walker
+  reported =failed=0= for every branch, but about nine of the 14 =collective/hereWeb= leaves failed in
+  fact (the =g_csMain= exit-code limitation below). The per-leaf table is in AI-WorkPlan.org Stage 4.
+  Shared causes: nginx cannot listen on =[::]:80= (breaks =nginx -t= for every vhost), six
+  =<name>Cbs-sbom.pcs= not on PATH, npm global installs without permission, Node too old for Astro.
+- The =collective/induct/= realm holds one real CBM (=vscodeClaude=, gate =available=, not enabled);
+  =emacsSrcBuild=, =bleeBuild= and =lcnt= are empty =README.org= directories, and there is no
+  =ftoBranchProc.spcs= there, so the =collective/= walk does not visit it.
+- The host was switched to the writable tree: =/bisos/git/bxRepos= points to =/bisos/git/auth/bxRepos=,
+  and =/bisos/venv/py3/dev-bisos3= has every =bisos-pip/*/py3= package editable (59 of 63; =lcnt=, =pycs=,
+  =qmailSvc= and =gnome= do not install). The session was rooted in the =anon= clone of this repo, which
+  is the same commit as the =auth= clone.
+- The follow-on work (a CBM that does the anon-to-auth and PyPI-to-local switch, a credentials CBM, and a
+  fast anon/devel switch) is planned in =bisos-pip/capSpecs/AI-WorkPlan.org= Stages 2 to 4, not here.
+- Out-of-chain record (pointer, not a copy): the cross-project findings of this run are in the ledger
+  =blee-binders/evolution/aiActivity-outputs/_nodeBase_/AI-Outputs.org= (four entries, FOUND 2026-11-04:
+  ftoProc.sh nodesList, pkgReInstall exit code and four packages, fullyMaterialize failures, switched
+  host). Under version control (the =evolution= repo, uncommitted when written). Written 2026-11-04;
+  actionable when those repos are fixed. Written to the =anon= clone and copied to =auth=.
+
 * Architecture
 
 ** Three-way triad: CBA / CBS / CBM
@@ -166,6 +187,10 @@ Verified end-to-end (2026-08-15):
 - *No PyPI release with the CBM additions.* Existing 0.12 release
   predates this work. When ready, run =pypiProc.sh -i fullPrep= +
   =fullPrepBuild forPypi= per the =bisos-pip-release= skill.
+
+- *Fixes for the 2026-11-04 =fullyMaterialize= failures* (Stage 4 TODOs): none done; the causes are
+  mostly in other packages (webCap, the CBM packages, csPlayer-webUi). Re-running =csPlayerUi= may now
+  behave differently: =cliGui/webCliGui= was cloned afterwards.
 
 * Key Design Decisions
 

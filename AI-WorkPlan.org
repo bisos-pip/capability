@@ -482,6 +482,78 @@ It needs to include the following features
 
 
 
+* Stage 4: fullyMaterialize Run of 2026-11-04 --- Findings and Fixes
+
+Goal: record what =sysCbmManage.cs -i fullyMaterialize= did on this host (Debian 13, Python 3.13,
+Node v20.19.2) and drive the failures to green. The walker's own summary said =failed=0= for every
+branch; that is the known =g_csMain= exit-code limitation, so pass/fail below is taken from the
+real errors in the log. Run was made by Claude at the user's request; it edited =/etc/hosts= (backups
+=/etc/hosts.2026110404*=), made nginx =sites-enabled= symlinks, pip-installed into the asc venv and
+enabled/started the airflow and csPlayerPerf units.
+
+** Results: =collective/hereWeb= (14 leaves)
+
+| Leaf            | Result  | What happened                                                              |
+|-----------------+---------+----------------------------------------------------------------------------|
+| nginx           | Partial | CBS ran; =nginx.service= is failed                                         |
+| airflow         | Partial | pip, db, scheduler, triggerer, dag-processor, api-server (24006) up; vhost enable failed on =nginx -t= |
+| kafka           | Failed  | =kafkaCbs-sbom.pcs: command not found= (127)                               |
+| prometheus      | Failed  | =prometheusCbs-sbom.pcs: command not found= (127)                          |
+| grafana         | Failed  | =grafanaCbs-sbom.pcs: command not found= (127)                             |
+| pypiserver      | Failed  | =pypiserverCbs-sbom.pcs: command not found= (127)                          |
+| devpi           | Failed  | =devpiCbs-sbom.pcs: command not found= (127)                               |
+| geneweb         | Failed  | =genewebCbs-sbom.pcs: command not found= (127)                             |
+| reactPlus       | Failed  | five =npm install --global= calls: EACCES on =/usr/local/lib/node_modules= |
+| gatsbyBxSidebar | Partial | =gatsby: command not found= (knock-on of reactPlus); vhost failed on =nginx -t= |
+| csPlayerPerf    | Partial | first =try-restart= failed (unit not yet created); then unit created, active (running) |
+| csPlayerUi      | Failed  | =npm ci= failed; build wanted =/bxRepos/cliGui/webCliGui/package.json= (absent); vhost failed on =nginx -t= |
+| platform        | Failed  | =astro build=: Node v20.19.2, Astro needs >=22.12; vhost failed on =nginx -t= |
+| pals/example    | Skipped | =cbmProc.control = available= (by design)                                  |
+
+** Results: =collective/induct= (individually, 2026-11-04)
+
+| Leaf            | Result      | What happened                                                          |
+|-----------------+-------------+------------------------------------------------------------------------|
+| emacsSrcBuild   | Not a CBM   | directory holds an empty =README.org= only; no =cbmProc.spcs=          |
+| bleeBuild       | Not a CBM   | empty =README.org= only                                                |
+| lcnt            | Not a CBM   | empty =README.org= only                                                |
+| vscodeClaude    | Skipped     | =cbm_materialize= gated: =control=available=; not enabled (installs VS Code/Claude/Blee for the invoking user) |
+
+There is no =ftoBranchProc.spcs= in =induct/=, so the =collective/= walk does not visit it.
+
+* Stage 4 TODOs
+** +
+** TODO [#A] nginx IPv6 listen: =socket() [::]:80 failed (97)= :ai:
+Single cause that breaks =nginx -t= for airflow, gatsbyBxSidebar, csPlayerUi, platform (and the
+nginx leaf itself). Find where the =[::]:80= listen comes from (default site? the vhost generator in
+=bisos.webCap=?), drop it or make it conditional on IPv6 being available.
+----- AI Results: ------
+** TODO [#A] =<name>Cbs-sbom.pcs= not on PATH for six CBM packages :ai:
+kafka, prometheus, grafana, pypiserver, devpi, geneweb: exit 127. Check whether the files are in
+each package's =setup.py= scripts list / installed in the venv bin, then reinstall or regenerate.
+----- AI Results: ------
+** TODO [#B] reactPlus npm global installs: EACCES :ai:
+Use a user-level npm prefix (or sudo for =-g= in the sbom) --- decide with the user. Unblocks
+gatsbyBxSidebar.
+----- AI Results: ------
+** TODO [#B] Node v20 too old for Astro (>=22.12) :aiAndMe:
+Affects platform (and likely csPlayerUi). Needs a Node upgrade sbom/step; user's decision.
+----- AI Results: ------
+** TODO [#B] csPlayerUi bad path =/bxRepos/cliGui/webCliGui= :ai:
+Likely missing =/bisos/git= prefix or an uncloned repo. Locate in csPlayerUi's CBS/assemble.
+----- AI Results: ------
+** TODO [#B] csPlayerPerf: first =try-restart= precedes unit creation :ai:
+Cosmetic but reports a failure on first materialize; reorder or use =restart= after enable.
+----- AI Results: ------
+** TODO [#B] =induct= realm: only vscodeClaude is a real CBM :aiAndMe:
+Decide whether emacsSrcBuild, bleeBuild and lcnt get CBM leaves (=cbmProc.spcs= + CBS), and whether
+=induct/= gets an =ftoBranchProc.spcs= so the walk covers it. Decide whether to enable vscodeClaude.
+----- AI Results: ------
+** TODO [#C] Upstream: walker =failed=0= despite real failures (g_csMain) :aiAndMe:
+Already in Known Limitations; this run is a clear example (about 9 failing leaves reported as 0 failed).
+----- AI Results: ------
+** -
+
 * Known Limitations Carried Forward
 
 - *g_csMain exit-code propagation.* =bisos.b.cs.main.g_csMain= currently
