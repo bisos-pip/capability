@@ -84,6 +84,25 @@ canonical CBM leaf exemplar; walked from
   host). Under version control (the =evolution= repo, uncommitted when written). Written 2026-11-04;
   actionable when those repos are fixed. Written to the =anon= clone and copied to =auth=.
 
+2026-11-13 (auth clone; uncommitted) --- AI-WorkPlan.org Stage 4, anchors =<<4.1>>= to =<<4.8>>= added:
+- A read-only survey of all 21 leaves (Stage 4, "Survey of 2026-11-13"), then the agreed order.
+- =<<4.1>>= nginx up: =bisos.webCap='s =nginx-sysd.pcs= runs =nginx-noIpv6.sh= as =preFunc= (no IPv6 in
+  this container); the script is now idempotent. =<<4.2>>= the six packages (kafka, prometheus, grafana,
+  pypiserver, devpi, geneweb) materialized: units active, =.here= answering, =driftCheck= clean.
+- =<<4.7>>= =cbmDispatch= now also walks =collective/induct/= (new =ftoBranchProc.spcs= in
+  =bro_rawBisos=), last. A full =fullyMaterialize= ran (7.5 min): hereWeb 14, pals 3, induct 8.
+- =<<4.3>>=, =<<4.4>>=, =<<4.5>>=: the user chose nvm. nvm is at =$XDG_CONFIG_HOME/nvm=, which
+  =nvm-sbom.pcs= (bisos/bsip4) did not look for, so no Node had been installed. Fixed there, in
+  =bisos.sbom= (npm loads nvm) and in =bisos.webCap= (=nodeEnv.py=; Astro and Gatsby builds load nvm).
+  Node v26.13.1; reactPlus, gatsbyBxSidebar, platform, csPlayerUi materialized and their =.here= sites
+  answer 200 (csPlayerUi's lock is accepted by npm 11). Open in 4.3: =sbom_fullUpdate= runs =sbomsList=
+  last (a fresh host would run reactPlus's =npm -g= before nvm), and the fixes reach the =bisos3= venv
+  only with releases of bisos.sbom and bisos.webCap.
+- Not worked on: =<<4.6>>= (csPlayerPerf =try-restart=), =<<4.8>>= (upstream =g_csMain=). Undecided:
+  enabling vscodeClaude. A read-only check of every site nginx serves is now =webSitesEnabled.cs -i
+  verify= (bisos.webCap WorkPlan =<<3.1>>=). The session was rooted in the =anon= clone; these edits are
+  in =auth= only.
+
 * Architecture
 
 ** Three-way triad: CBA / CBS / CBM
@@ -188,9 +207,9 @@ Verified end-to-end (2026-08-15):
   predates this work. When ready, run =pypiProc.sh -i fullPrep= +
   =fullPrepBuild forPypi= per the =bisos-pip-release= skill.
 
-- *Fixes for the 2026-11-04 =fullyMaterialize= failures* (Stage 4 TODOs): none done; the causes are
-  mostly in other packages (webCap, the CBM packages, csPlayer-webUi). Re-running =csPlayerUi= may now
-  behave differently: =cliGui/webCliGui= was cloned afterwards.
+- *Fixes for the 2026-11-04 =fullyMaterialize= failures* (Stage 4): done 2026-11-13 for 4.1--4.5 and
+  4.7, each leaf re-materialized on its own; a full =fullyMaterialize= after the Node fixes has not been
+  run. The nginx IPv6 fix is untested on a host with IPv6.
 
 * Key Design Decisions
 

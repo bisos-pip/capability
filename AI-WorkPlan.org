@@ -11,6 +11,18 @@
 #   Command:   /bisos/venv/py3/devbin/aiActivity.cs -i initiate --activity=bisos-pip
 
 ####+BEGIN: b:ai:workflow/driver
+*  [[elisp:(revert-buffer)][revert-buffer]] | [[elisp:(toggle-read-only)][read/wr]] | [[elisp:(show-all)][Show-All]]  [[elisp:(org-shifttab)][Overview]]  [[elisp:(progn (org-shifttab) (org-content))][Content]] | [[elisp:(delete-other-windows)][(1)]] | [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] [[elisp:(save-buffer)][Save]] [[elisp:(kill-buffer)][Quit]] [[elisp:(bury-buffer)][Bury]] [[elisp:(magit)][Magit]]
+*  [[elisp:(org-cycle)][AI Workflow Driver :: /bx- commands]]    *After |S|: submitted*
+  newStart :: [[elisp:(blee:bnsm:panel-goto "/bisos/panels/bisos-core/bisos-pip/bisos.aiActivity/newStart/_nodeBase_")][Panel]] | [[bashRun:vscodeClaude-assemble.cs -i fullCheck][setup-check]] | [[bashRun:vscodeClaude-assemble.cs -i fullUpdate][setup]] | [[elisp:(b:vscode/init)][partner-init]] | [[elisp:(b:vscode/partnerShow)][partner-show]] | [[aiActivity:session-start][session-start]]
+  VS Code  :: [[elisp:(b:vscode/fileOpen)][Visit]] | [[elisp:(b:vscode/rootOpen)][root-window]] | [[elisp:(b:vscode:claude/dispatch)][Transient]]
+  Session  :: [[elisp:(b:vscode:claude/sessionSelect)][select-session]] | [[aiActivity:session-start][session-start]] | [[aiActivity:session-report][session-report]]  *|S|*  [[aiActivity:S=session-start][session-start]]
+  Activity :: [[aiActivity:activity-reach][activity-reach]] | [[aiActivity:activity-report][activity-report]]  *|S|*  [[aiActivity:S=activity-reach][activity-reach]]
+  Read     :: [[aiActivity:status-read][status-read]] | [[aiActivity:archive-read][archive-read]] | [[aiActivity:ai-outputs][ai-outputs]]  *|S|*  [[aiActivity:S=status-read][status-read]] | [[aiActivity:S=archive-read][archive-read]] | [[aiActivity:S=ai-outputs][ai-outputs]]
+  Work     :: [[aiActivity:todo-do][todo-do]] | [[aiActivity:todo-done][todo-done]]  *|S|*  [[aiActivity:S=todo-do][todo-do]] | [[aiActivity:S=todo-done][todo-done]]
+  Record   :: [[aiActivity:status-update][status-update]] | [[aiActivity:archive-update][archive-update]]  *|S|*  [[aiActivity:S=status-update][status-update]] | [[aiActivity:S=archive-update][archive-update]]
+  Git      :: [[aiActivity:git-commit-msg][git-commit-msg]] | [[aiActivity:git-commit-walk][git-commit-walk]]  *|S|*  [[aiActivity:S=git-commit-msg][git-commit-msg]]
+  Close    :: [[aiActivity:git-uncommitted-list][git-uncommitted-list]] | [[aiActivity:session-verify][session-verify]]  *|S|*  [[aiActivity:S=git-uncommitted-list][git-uncommitted-list]] | [[aiActivity:S=session-verify][session-verify]]
+
 ####+END:
 
 ####+BEGIN: b:ai:file/particulars
@@ -521,35 +533,141 @@ enabled/started the airflow and csPlayerPerf units.
 
 There is no =ftoBranchProc.spcs= in =induct/=, so the =collective/= walk does not visit it.
 
+** Survey of 2026-11-13 (read-only; after the host switch to auth)
+
+All 21 leaves of =/bisos/platform/sys/cbm= (now =auth=), checked live, not from =cbmProc.status=: the
+11-04 run went through the =anon= tree, whose status files hold it, and "ran: ... ok" is not trusted
+(=<<4.8>>=). Checks: =systemctl=, =nginx -t=, ports, build outputs, each induct assemble's =fullCheck= or
+=toolchainCheck=.
+
+| Leaf              | Gate      | On this host  | Known problems                                    |
+|-------------------+-----------+---------------+---------------------------------------------------|
+| nginx             | enabled   | Failed        | =[::]:80= listen, no IPv6 (=<<4.1>>=)             |
+| airflow           | enabled   | Partial       | units up, 24006 answers 200; vhost down (nginx)   |
+| csPlayerPerf      | enabled   | Works         | cosmetic first =try-restart= (=<<4.6>>=)          |
+| csPlayerUi        | enabled   | Failed        | not built; =webCliGui= now cloned (=<<4.5>>=)     |
+| platform          | enabled   | Failed        | not built: Node v20.19.2 (=<<4.4>>=)              |
+| reactPlus         | enabled   | Failed        | npm =-g= EACCES; no gatsby (=<<4.3>>=)            |
+| gatsbyBxSidebar   | enabled   | Failed        | no =gatsby=; not built (=<<4.3>>=)                |
+| kafka             | enabled   | Not mat.      | no units; =Cbs-sbom= now on PATH (=<<4.2>>=)      |
+| prometheus        | enabled   | Not mat.      | as kafka                                          |
+| grafana           | enabled   | Not mat.      | as kafka                                          |
+| pypiserver        | enabled   | Not mat.      | as kafka                                          |
+| devpi             | enabled   | Not mat.      | as kafka                                          |
+| geneweb           | enabled   | Not mat.      | as kafka                                          |
+| emacsSrcBuild     | enabled   | Works         | no =/usr/local/bin/emacsclient= (capSpecs 1.2)    |
+| bleeBuild         | enabled   | Works         | pin provenance (capSpecs 1.1)                     |
+| lcntCore          | enabled   | Works         | =toolchainCheck= complete                         |
+| lcntBases         | enabled   | Works         | complete                                          |
+| lcntMultiMedia    | enabled   | Works         | complete for Container                            |
+| pltfrmDevelBecome | available | Not enabled   | =bootstrap-vagrants= not cloned (capSpecs 2.10)   |
+| vscodeClaude      | available | Not enabled   | four user settings differ; one extension newer    |
+| pals/example      | available | Not enabled   | by design                                         |
+
+- The airflow leaf lists an =airflow-api-server= unit that does not exist here; =airflow-webserver=
+  runs. =nginx= is enabled but failed, so no =.here= vhost is served.
+- =induct/= (7 leaves) has no =ftoBranchProc.spcs=: =fullyMaterialize= does not reach it (=<<4.7>>=).
+  Directories without a CBM (=README.org= only): =hereMail/residentMta=, =rpyc/facterPerf=, =devel/gh1=,
+  =devel/gh2=, =other/example/generic= and the realms =platform=, =site=, =user=.
+- Order agreed with the user: =<<4.1>>=, =<<4.2>>=, =<<4.3>>=, =<<4.4>>= with =<<4.5>>=, then =<<4.7>>=.
+
 * Stage 4 TODOs
 ** +
-** TODO [#A] nginx IPv6 listen: =socket() [::]:80 failed (97)= :ai:
+** TODO [#A] <<4.1>> nginx IPv6 listen: =socket() [::]:80 failed (97)= :ai:
 Single cause that breaks =nginx -t= for airflow, gatsbyBxSidebar, csPlayerUi, platform (and the
 nginx leaf itself). Find where the =[::]:80= listen comes from (default site? the vhost generator in
 =bisos.webCap=?), drop it or make it conditional on IPv6 being available.
 ----- AI Results: ------
-** TODO [#A] =<name>Cbs-sbom.pcs= not on PATH for six CBM packages :ai:
+2026-11-13 (Claude): fixed, in =bisos.webCap= (auth, uncommitted). The listen came from Debian's packaged
+=sites-available/default= (=nginx-common=), not from the BISOS vhosts. webCap already had
+=nginx-noIpv6.sh= (comment out =listen ... [::]= when IPv6 is disabled, =nginx -t=, restart; restore on
+failure), but nothing called it.
+- =nginx-sysd.pcs=: =systemd_seedInfo.setup(preFunc=noIpv6)=; =ensure= runs it (=sudo=) before it
+  restarts nginx. A no-op where IPv6 is enabled.
+- =nginx-noIpv6.sh=: the scan matched commented =[::]= lines too, so a re-run patched again, overwrote
+  =default.bak_ipv6= with the patched file and restarted nginx. It now looks only at active lines. On
+  this host the first backup was overwritten before the fix; the original is the packaged one (it
+  differs in line 23 only).
+- Tested through the leaf: =nginx= active, =nginx -t= passes, =airflow.here= 200; a third
+  materialize: "No active IPv6 listen directives", nothing changed. Not tested on a host with IPv6.
+** TODO [#A] <<4.2>> =<name>Cbs-sbom.pcs= not on PATH for six CBM packages :ai:
 kafka, prometheus, grafana, pypiserver, devpi, geneweb: exit 127. Check whether the files are in
 each package's =setup.py= scripts list / installed in the venv bin, then reinstall or regenerate.
 ----- AI Results: ------
-** TODO [#B] reactPlus npm global installs: EACCES :ai:
+2026-11-13 (Claude): resolved by the 11-04 host switch (=devbin= has every =<name>Cbs-sbom.pcs=); no
+code change. The six leaves materialized one by one (=cbm_materialize=, 00:14--00:19, 5 min in all):
+all ten units active and enabled; =kafka=, =pypiserver=, =devpi=, =geneweb.here= 200, =prometheus= and
+=grafana.here= 302 (their redirects); each =<name>Admin.cs -i driftCheck= agrees on every item.
+** TODO [#B] <<4.3>> reactPlus npm global installs: EACCES :ai:
 Use a user-level npm prefix (or sudo for =-g= in the sbom) --- decide with the user. Unblocks
 gatsbyBxSidebar.
 ----- AI Results: ------
-** TODO [#B] Node v20 too old for Astro (>=22.12) :aiAndMe:
+2026-11-13 (Claude; stopped for the user's decision): the cause is not the npm prefix as such.
+=reactPlus-sbom.pcs= is designed around nvm (per user, =~/.nvm=, globals under
+=~/.nvm/versions/node/<ver>/=), via =/bisos/core/bsip/bin/nvm-sbom.pcs=. On this host =~/.nvm= is absent,
+so npm is Debian's (=/bin/npm=, prefix =/usr/local=): EACCES. And =npmPkgs_update= runs =npm install -g=
+in a non-interactive bash that never sources =nvm.sh=, so even with nvm installed the globals would go
+to the system npm. The decision, with =<<4.4>>=: how a platform provides Node (nvm per user, or a
+system Node >= 22.12, e.g. NodeSource apt, with =sudo npm -g= or a BISOS-owned prefix).
+2026-11-13 (Claude; the user decided: nvm, as =which -a node= shows on their host): fixed, auth,
+uncommitted. nvm is at =$XDG_CONFIG_HOME/nvm= (=~/.config/nvm=), where nvm's =install.sh= puts it when
+=XDG_CONFIG_HOME= is set; =nvm-sbom.pcs= assumed =~/.nvm=, so its =nvmInstall_lts= never found =nvm.sh=
+and no Node was installed (=versions/= empty), silently (=g_csMain=).
+- =bisos/bsip4/bin/nvm-sbom.pcs=: one =nvmDirPrelude= (=NVM_DIR=, else =$XDG_CONFIG_HOME/nvm=, else
+  =~/.nvm=) for both functions; =nvmInstall_lts= exits 1 without =nvm.sh=, installs the LTS, sets
+  =nvm alias default lts/*= and prints the node in use. Readme and examples updated.
+- =bisos.sbom= =sbom_csu.py=: =nvmLoadPrelude= before =npm list= and =npm install= (=npmPkg_isInstalled=,
+  =npmPkgs_update=); without nvm, the system npm as before.
+- =bisos.webCap=: new =nodeEnv.py= (the same prelude; =withNvm(argv)=, =withNvmBash(script)=);
+  =astroProc_csu.siteBuild_= runs =npm ci= and =npx astro build= through it.
+- =bisos-web/gatsby-starter-bystar-nestedSidebar/gatsbyBxSidebar-assemble.cs=: =npm install && gatsby
+  build= through =nodeEnv.withNvmBash=. Its =npm install= also rewrote =package-lock.json= (npm 11).
+- Tested with =NVM_DIR= unset: =nvm-sbom.pcs= installed Node v26.13.1 (the LTS today) and made it
+  default; =reactPlus-sbom.pcs= put its five globals in nvm's Node, no EACCES; reactPlus,
+  gatsbyBxSidebar, platform and csPlayerUi materialized through their leaves; =starterSidebar.here=,
+  =platform.here=, =csPlayerUi.here= 200.
+- Open: =sbom_fullUpdate= runs =sbomsList= last (after apt, pip, pipx, npm), so on a fresh host
+  reactPlus's =npm -g= runs before its =nvm-sbom.pcs= prerequisite. Changing that order is a
+  =bisos.sbom= framework change for every sbom: user's decision. The =bisos3= venv (provisioning) has
+  the PyPI =bisos.sbom= and =bisos.webCap=: these fixes reach it only with a release.
+** TODO [#B] <<4.4>> Node v20 too old for Astro (>=22.12) :aiAndMe:
 Affects platform (and likely csPlayerUi). Needs a Node upgrade sbom/step; user's decision.
 ----- AI Results: ------
-** TODO [#B] csPlayerUi bad path =/bxRepos/cliGui/webCliGui= :ai:
+2026-11-13 (Claude): unchanged, user's decision (see =<<4.3>>=). It now blocks csPlayerUi too: that
+site is Astro (=astroProc.spcs -i siteBuild=), not Gatsby (=@astrojs/compiler-rs= needs >= 22.12).
+2026-11-13 (Claude): fixed with =<<4.3>>=: nvm's LTS Node (v26.13.1) through =nodeEnv= in =siteBuild_=.
+platform built (34 pages), =platform.here= 200.
+** TODO [#B] <<4.5>> csPlayerUi bad path =/bxRepos/cliGui/webCliGui= :ai:
 Likely missing =/bisos/git= prefix or an uncloned repo. Locate in csPlayerUi's CBS/assemble.
 ----- AI Results: ------
-** TODO [#B] csPlayerPerf: first =try-restart= precedes unit creation :ai:
+2026-11-13 (Claude): the path problem is gone (=cliGui/webCliGui= cloned since 11-04). Re-materialized
+through the leaf: =npm ci= now fails on the lock file: "Missing: @types/rc-tree@1.11.4 from lock
+file" (=package.json= and =package-lock.json= out of sync in =bisos-web/csPlayer-webUi/site=), besides
+=<<4.4>>=. The lock is that repo's to regenerate (=npm install=); not done here. =csPlayerUi.here= 404.
+2026-11-13 (Claude): works after =<<4.3>>=: with nvm's npm 11, =npm ci= accepts the lock as is (the
+"Missing" error was the old npm's); built (10 pages), =csPlayerUi.here= 200; the repo is unchanged.
+** TODO [#B] <<4.6>> csPlayerPerf: first =try-restart= precedes unit creation :ai:
 Cosmetic but reports a failure on first materialize; reorder or use =restart= after enable.
 ----- AI Results: ------
-** TODO [#B] =induct= realm: only vscodeClaude is a real CBM :aiAndMe:
+** TODO [#B] <<4.7>> =induct= realm: only vscodeClaude is a real CBM :aiAndMe:
 Decide whether emacsSrcBuild, bleeBuild and lcnt get CBM leaves (=cbmProc.spcs= + CBS), and whether
 =induct/= gets an =ftoBranchProc.spcs= so the walk covers it. Decide whether to enable vscodeClaude.
 ----- AI Results: ------
-** TODO [#C] Upstream: walker =failed=0= despite real failures (g_csMain) :aiAndMe:
+2026-11-13 (Claude; the user agreed to step 5 of the survey's order, an =induct/ftoBranchProc.spcs=):
+- emacsSrcBuild, bleeBuild and lcnt are now real CBMs (capSpecs Stages 5--6; lcnt as lcntCore, lcntBases,
+  lcntMultiMedia). New =bro_rawBisosPlatform/sys/cbm/collective/induct/ftoBranchProc.spcs=
+  (=branchesOrdered=: pltfrmDevelBecome, lcntCore, lcntBases, lcntMultiMedia, emacsSrcBuild, bleeBuild,
+  vscodeClaude), and =sysCbmManage_csu.cbmDispatch= walks it last, after =pals=, as
+  =./ftoBranchProc.spcs=. The catalog =bxGenesis/start/rawBisosCBMs/README.org= is updated (walk
+  scope, induct table, csPlayerPerf).
+- Tested: =sysCbmManage.cs -i fullyMaterialize=, 00:20--00:28 (7.5 min): hereWeb 14, pals 3, induct 8
+  visited, in order. induct: lcntCore, lcntBases, lcntMultiMedia (for Container), emacs31SrcBuild and
+  blee31Build complete (builds skipped); pltfrmDevelBecome and vscodeClaude skipped by their gates. The
+  two lcnt sbom "FAILED" lines are lcnt's known legacy exit 1 (lcnt WorkPlan 2.2). hereWeb: as the
+  survey, with nginx and the six now up; reactPlus EACCES, gatsbyBxSidebar no =gatsby=, csPlayerUi lock
+  file, platform Node: =<<4.3>>=, =<<4.4>>=, =<<4.5>>=. The walker still said =failed=0= (=<<4.8>>=).
+- Not decided here: whether to enable vscodeClaude.
+** TODO [#C] <<4.8>> Upstream: walker =failed=0= despite real failures (g_csMain) :aiAndMe:
 Already in Known Limitations; this run is a clear example (about 9 failing leaves reported as 0 failed).
 ----- AI Results: ------
 ** -

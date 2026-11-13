@@ -248,6 +248,15 @@ This pattern is called listOfArgs subject to Action.
                     f"""./ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='{cmndName}'""",
                 ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
+        # Then collective/induct: non-service capabilities (lcnt, Emacs from source, Blee, ...), in the
+        # order of its ftoBranchProc.spcs. Last: none of the services above needs them. AI-WorkPlan.org 4.7.
+        inductRoot = "/bisos/platform/sys/cbm/collective/induct"
+        if os.path.isfile(os.path.join(inductRoot, "ftoBranchProc.spcs")):
+            for cmndName in ('cbm_status', 'cbm_materialize'):
+                if b.subProc.WOpW(invedBy=self, cd=inductRoot, log=1).bash(
+                    f"""./ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='{cmndName}'""",
+                ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
+
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
             opResults=None,
