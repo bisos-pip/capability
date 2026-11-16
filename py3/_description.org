@@ -1,6 +1,11 @@
 #+title: bisos.capability:  BISOS Capabilities Bundles -- Abstraction, Specification and Materialization
 
 
+|----------------------+------------------------------------------------------------------|
+| ~Blee Panel Controls~: | [[elisp:(show-all)][Show-All]] : [[elisp:(org-shifttab)][Overview]] : [[elisp:(progn (org-shifttab) (org-content))][Content]] : [[elisp:(delete-other-windows)][(1)]] : [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] : [[elisp:(save-buffer)][Save]]  : [[elisp:(kill-buffer)][Quit]]  : [[elisp:(bury-buffer)][Bury]] |
+| ~Panel Links~:         | [[file:./panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]] --  [[file:/bisos/git/auth/bxRepos/bisos-pip/capability/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Blee Panel]]                                   |
+| ~See Also~:            | [[https://pypi.org/project/bisos.capability][At PYPI]] : [[https://github.com/bisos-pip/pycs][bisos.PyCS]]                                             |
+|----------------------+------------------------------------------------------------------|
 
 
 * Overview
@@ -71,6 +76,14 @@ CBM machinery (additive, non-invasive to the above):
 - =cbmProc_seed.py= --- atexit registrar for =cbmProc-seed.cs=
 - =cbmProc_csu.py= --- =cbm_*= Cmnd classes + =_dispatchCbs()= helper
 - =bin/cbmProc-seed.cs= --- the CBM-aware seed CSXU
+- =sysCbmManage_csu.py=, =bin/sysCbmManage.cs= --- =fullyMaterialize=: =cbm_status= then
+  =cbm_materialize= over the platform's tree --- =collective/hereWeb=, then the =pals= realm
+  (=sys/cbm/pals/<palsBxo>/<cbm>/=, planted by bisos.pals's =palsOfSys.cs=) when it has a
+  =ftoBranchProc.spcs=
+
+An explicit =cbsSpec= path is used as planted, not resolved: a CBS that is a symlink to a generic,
+spread-planted file (a PALS site's =cbm/pals-cbs.spcs=) runs by its own path, which is how it finds its
+parameters.
 
 ** Canonical exemplar
 
@@ -89,11 +102,6 @@ across absolute-path/slash-path/basename forms.
 
 
 
-* Package Documentation At Github
-
-The information below is a subset of the full of documentation for this bisos-pip package.
-More complete documentation is available at: https://github.com/bisos-pip/capability-cs
-
 
 * Realted Resources
 
@@ -106,10 +114,6 @@ More complete documentation is available at: https://github.com/bisos-pip/capabi
 
 * Table of Contents     :TOC:
 - [[#overview][Overview]]
-  - [[#files-in-this-package][Files in this package]]
-  - [[#canonical-exemplar][Canonical exemplar]]
-  - [[#tests][Tests]]
-- [[#package-documentation-at-github][Package Documentation At Github]]
 - [[#realted-resources][Realted Resources]]
 - [[#installation][Installation]]
   - [[#installation-with-pip][Installation With pip]]

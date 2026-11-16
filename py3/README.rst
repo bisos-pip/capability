@@ -2,9 +2,39 @@
 bisos.capability: BISOS Capabilities Bundles – Abstraction, Specification and Materialization
 =============================================================================================
 
+
 .. contents::
    :depth: 3
 ..
+
++--------------------------+------------------------------------------+
+| ``Blee Panel Controls``: | `Show-All <elisp:(show-all)>`__ :        |
+|                          | `Overview <elisp:(org-shifttab)>`__ :    |
+|                          | `Content <elisp:                         |
+|                          | (progn (org-shifttab) (org-content))>`__ |
+|                          | : `(1) <elisp:(delete-other-windows)>`__ |
+|                          | :                                        |
+|                          | `S&Q <elisp                              |
+|                          | :(progn (save-buffer) (kill-buffer))>`__ |
+|                          | : `Save <elisp:(save-buffer)>`__ :       |
+|                          | `Quit <elisp:(kill-buffer)>`__ :         |
+|                          | `Bury <elisp:(bury-buffer)>`__           |
++--------------------------+------------------------------------------+
+| ``Panel Links``:         | `Repo Blee                               |
+|                          | Panel <./panels/bisos.capabil            |
+|                          | ity/_nodeBase_/fullUsagePanel-en.org>`__ |
+|                          | – `Blee                                  |
+|                          | Panel <file:///bisos/git/auth/bxRepos/b  |
+|                          | isos-pip/capability/panels/bisos.capabil |
+|                          | ity/_nodeBase_/fullUsagePanel-en.org>`__ |
++--------------------------+------------------------------------------+
+| ``See Also``:            | `At                                      |
+|                          | PYPI <https                              |
+|                          | ://pypi.org/project/bisos.capability>`__ |
+|                          | :                                        |
+|                          | `bisos.PyC                               |
+|                          | S <https://github.com/bisos-pip/pycs>`__ |
++--------------------------+------------------------------------------+
 
 Overview
 ========
@@ -79,6 +109,16 @@ CBM machinery (additive, non-invasive to the above):
 -  ``cbmProc_csu.py`` — ``cbm_*`` Cmnd classes + ``_dispatchCbs()``
    helper
 -  ``bin/cbmProc-seed.cs`` — the CBM-aware seed CSXU
+-  ``sysCbmManage_csu.py``, ``bin/sysCbmManage.cs`` —
+   ``fullyMaterialize``: ``cbm_status`` then ``cbm_materialize`` over
+   the platform's tree — ``collective/hereWeb``, then the ``pals`` realm
+   (``sys/cbm/pals/<palsBxo>/<cbm>/``, planted by bisos.pals's
+   ``palsOfSys.cs``) when it has a ``ftoBranchProc.spcs``
+
+An explicit ``cbsSpec`` path is used as planted, not resolved: a CBS
+that is a symlink to a generic, spread-planted file (a PALS site's
+``cbm/pals-cbs.spcs``) runs by its own path, which is how it finds its
+parameters.
 
 Canonical exemplar
 ------------------
@@ -86,7 +126,7 @@ Canonical exemplar
 Airflow at
 ``/bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/sys/cbm/collective/hereWeb/airflow/``
 — three-file CBM leaf pointing to ``airflow-cbs.pcs``. See
-`bro\ rawBisosPlatform/README.org </bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/README.org>`__
+`bro\ rawBisosPlatform/README.org <file:///bisos/git/auth/bxRepos/bxObjects/bro_rawBisos/bro_rawBisosPlatform/README.org>`__
 for the realm/capabilityType layering.
 
 Tests
@@ -96,13 +136,6 @@ Tests
 singleton, Cmnd class presence, control/status roundtrips,
 paramsFromPlantPath, walkExamples coverage, and ``cbsSpec`` resolution
 across absolute-path/slash-path/basename forms.
-
-Package Documentation At Github
-===============================
-
-The information below is a subset of the full of documentation for this
-bisos-pip package. More complete documentation is available at:
-https://github.com/bisos-pip/capability-cs
 
 Realted Resources
 =================
@@ -129,13 +162,6 @@ Table of Contents TOC
 =====================
 
 -  `Overview <#overview>`__
-
-   -  `Files in this package <#files-in-this-package>`__
-   -  `Canonical exemplar <#canonical-exemplar>`__
-   -  `Tests <#tests>`__
-
--  `Package Documentation At
-   Github <#package-documentation-at-github>`__
 -  `Realted Resources <#realted-resources>`__
 -  `Installation <#installation>`__
 

@@ -11,7 +11,7 @@ tramp
 
 # Org-mode
 .org-id-locations
-*_archive
+#  _archive   # We often want to keep the org archives as well.
 
 # flymake-mode
 *_flymake.*
@@ -72,8 +72,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-py3/README.rst
-py3/_description.org
+**/py3/README.rst
+**/py3/_description.org
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
