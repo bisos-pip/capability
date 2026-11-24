@@ -40,7 +40,7 @@ CBS files.
 - CBM machinery (added this session, additive-only):
   =cbmProc_seedInfo.py=, =cbmProc_seed.py=, =cbmProc_csu.py=,
   =bin/cbmProc-seed.cs=.
-- Tests: =py3/tests/verify.sh= --- 54 assertions, 0 failures.
+- Tests: =py3/tests/verify.sh= --- 66 assertions, 0 failures (2026-11-24).
 - Package is =pip install -e='d locally.
 - PyPI release: NOT yet made for the CBM additions. Existing 0.12
   release predates this work.
@@ -62,6 +62,18 @@ canonical CBM leaf exemplar; walked from
   (kafka checked). AI-Outputs entry (DONE).
 - On the dev host this package was the PyPI 0.23 copy, not editable; it is now =pip install -e= from
   this repo (the repo differed only by =sysCbmManage_csu.py= and this fix).
+
+2026-11-24 (uncommitted, not released) --- bxGenesis/base 3.1.2.1, Phase 1 of the rawBisosCBM fix:
+- =cbmProc.status= moved to =/bisos/var/cbm/<leafRel>/= with a =leaf= link back (Key Design Decisions);
+  =cbm_status= prints the path.
+- =cbm_bootstrap=, and the leaf's =cbmBootstrap-sbom.pcs= run first by =cbm_materialize=,
+  =cbm_reMaterialize=, =cbm_sbom=.
+- =verify.sh=: the status tests use a scratch =STATUS_BASE=, plus checks for the new symbols, the
+  =leaf= link and =leafRel=; =resolveCbsSpec relative-with-slash= fixed to expect an absolute, not a
+  resolved, path (stale since the 2026-10-19 fix below). 66 pass, 0 fail.
+- Tested here: the functions in a scratch base, =_bootstrapRun= with a fake bootstrap (rc 0 and 3),
+  =cbm_status= / =cbm_bootstrap= on the real kafka leaf (read-only). Not tested: a real materialize
+  through a bootstrap, and anything on the VM. The VM needs this released (bisos.capability > 0.26).
 
 2026-11-04 (nothing in this repo's code changed; findings and a hand-run) --- see AI-WorkPlan.org Stage 4:
 - =sysCbmManage.cs -i fullyMaterialize= was run on this host (Debian 13, Python 3.13, Node 20). The walker
@@ -132,7 +144,9 @@ Three files at =sys/cbm/<realm>/<capabilityType>/<capabilityName>/=:
 - =cbmProc.control= --- plain-text single-word: =available=,
   =enabled=, or =disabled=. Not JSON.
 - =cbmProc.status= --- append-only timestamped log of skip / run /
-  failure events.
+  failure events. Not in the leaf since 2026-11-24 (below): under =/bisos/var/cbm/<leafRel>/=.
+- =cbmBootstrap-sbom.pcs= (optional) --- what the capability needs before its CBS can run;
+  =cbm_bootstrap= runs it, and the materialize verbs run it first.
 
 ** Two verb families in =cbmProc_csu.py=
 
@@ -281,6 +295,24 @@ Explicit design decision. Current format: single-word for =.control=
 the accessors (=controlRead/Write=, =statusRead/Write=) to a more
 structured format without changing caller code (they deal in
 =ControlState= enum values, not raw strings).
+
+** The status under =/bisos/var/cbm/=, the bootstrap in the leaf (2026-11-24)
+
+Decided in bxGenesis/base 3.1.2 (Phase 1, 3.1.2.1). The VM run of 2026-11-23 failed on every leaf
+with =PermissionError= writing =cbmProc.status= in an anon clone of bro_rawBisos. What a leaf has
+materialized is a fact of the host, so =statusPath()= is
+=/bisos/var/cbm/<leafRel>/cbmProc.status=: =<leafRel>= is the leaf's resolved path relative to
+=/bisos/git/<vcMode>/bxRepos/= (=leafRel()=), the vcMode dropped so an anon and an auth clone of
+a leaf share one status; outside bxRepos, =_abs_/<path>=. =statusWrite= creates the directories
+=2775= (=/bisos/var= is =bisos:bisos= setgid) and keeps a =leaf= symlink next to the status,
+pointing back at the leaf that wrote last. Nothing is written in the leaf; =cbmProc.control= stays
+there (the repo's policy). Not migrated: the old in-leaf files are left to the repos (bro_rawBisos
+ignores them).
+
+=cbmBootstrap-sbom.pcs= in the leaf: a bisos.sbom file whose Phase 1 content is pip packages into
+=bisos3= (the package carrying the CBS, so =cbsSpec= can be a basename). =_bootstrapRun= runs it
+after the gate and before =resolveCbsSpec=; a non-zero rc fails the leaf, but with the exit-code
+limitation below a failed =sbom_fullUpdate= usually shows only as the cbsSpec-unresolvable line.
 
 ** Known limitation: g_csMain exit-code propagation
 

@@ -187,11 +187,12 @@ class cbm_status(cs.Cmnd):
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
             return b_io.eh.badOutcome(cmndOutcome)
         p = _params()
+        path = cbmProc_seedInfo.statusPath(p.plantDir)
         contents = cbmProc_seedInfo.statusRead(p.plantDir)
         if not contents:
-            b_io.ann.write(f"[{p.capabilityName}] cbmProc.status is empty or absent")
+            b_io.ann.write(f"[{p.capabilityName}] {path} is empty or absent")
         else:
-            b_io.ann.write(f"[{p.capabilityName}] cbmProc.status:\n{contents}")
+            b_io.ann.write(f"[{p.capabilityName}] {path}:\n{contents}")
         return cmndOutcome.set(opError=b.op.OpError.Success, opResults=contents)
 
 
@@ -252,13 +253,40 @@ class cbm_control(cs.Cmnd):
 #      an error outcome.
 #   3. subprocess.run([cbs, '-i', verb, *extraArgs]). Log outcome to
 #      cbmProc.status.
+#
+#   With bootstrapFirst, the leaf's cbmBootstrap-sbom.pcs (when present) runs
+#   between 1 and 2, since what it installs is what makes cbsSpec resolvable.
 ###############################################################################
+
+def _bootstrapRun(
+        p: cbmProc_seedInfo.CbmProcParams,
+        verb: str,
+) -> int | None:
+    """Run the leaf's cbmBootstrap-sbom.pcs -i sbom_fullUpdate. None when the leaf has none, else rc.
+
+    NOTYET: a failed sbom_fullUpdate exits 0 (bisos-pip/b Stage 4), so a failure here usually
+    shows only as the cbsSpec-unresolvable line that follows.
+    """
+    bootstrap = cbmProc_seedInfo.bootstrapPath(p.plantDir)
+    if not bootstrap.exists():
+        return None
+    argv = [str(bootstrap), '-i', 'sbom_fullUpdate']
+    b_io.ann.note(f"[{p.capabilityName}] bootstrap: {' '.join(argv)}")
+    rc = subprocess.run(argv, check=False, cwd=p.plantDir).returncode
+    if rc == 0:
+        cbmProc_seedInfo.statusWrite(p.plantDir, f"ran: bootstrap ok (for {verb})")
+    else:
+        cbmProc_seedInfo.statusWrite(p.plantDir, f"ran: bootstrap failed rc={rc} (for {verb})")
+        b_io.ann.write(f"[{p.capabilityName}] bootstrap failed (subprocess rc={rc})")
+    return rc
+
 
 def _dispatchCbs(
         verb: str,
         rtInv: cs.RtInvoker,
         cmndOutcome: b.op.Outcome,
         extraArgs: list[str] | None = None,
+        bootstrapFirst: bool = False,
 ) -> b.op.Outcome:
     p = _params()
     plantDir = p.plantDir
@@ -277,6 +305,12 @@ def _dispatchCbs(
             opError=b.op.OpError.Success,
             opResults=f"skipped: control={state.value}",
         )
+
+    # --- 1b. The leaf's bootstrap ---
+    if bootstrapFirst:
+        rc = _bootstrapRun(p, verb)
+        if rc not in (None, 0):
+            return b_io.eh.badOutcome(cmndOutcome)
 
     # --- 2. Resolve cbsSpec ---
     try:
@@ -310,14 +344,15 @@ def _dispatchCbs(
 
 
 ###############################################################################
-# cbm_materialize --- gate-check + subprocess to cbsSpec -i cbs_materialize
+# cbm_bootstrap --- run the leaf's cbmBootstrap-sbom.pcs (not gated)
 ###############################################################################
 
-class cbm_materialize(cs.Cmnd):
-    """Materialize this capability: subprocess cbsSpec -i cbs_materialize.
+class cbm_bootstrap(cs.Cmnd):
+    """Run this leaf's cbmBootstrap-sbom.pcs -i sbom_fullUpdate.
 
-    Gated by cbmProc.control (must be =enabled=). CBS lives elsewhere ---
-    CBM does not duplicate it; it invokes it.
+    Installs what the capability needs before its CBS can run. Not gated by
+    cbmProc.control: it is run on request. cbm_materialize, cbm_reMaterialize
+    and cbm_sbom run it first (after the gate) when the file exists.
     """
     cmndParamsMandatory = []
     cmndParamsOptional = []
@@ -333,7 +368,44 @@ class cbm_materialize(cs.Cmnd):
         callParamsDict = {}
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
             return b_io.eh.badOutcome(cmndOutcome)
-        return _dispatchCbs('cbs_materialize', rtInv, cmndOutcome)
+        p = _params()
+        rc = _bootstrapRun(p, 'cbm_bootstrap')
+        if rc is None:
+            b_io.ann.write(
+                f"[{p.capabilityName}] no {cbmProc_seedInfo.BOOTSTRAP_FILENAME} in {p.plantDir}"
+            )
+            return cmndOutcome.set(opError=b.op.OpError.Success, opResults="no bootstrap")
+        if rc != 0:
+            return b_io.eh.badOutcome(cmndOutcome)
+        return cmndOutcome.set(opError=b.op.OpError.Success, opResults="ran: bootstrap ok")
+
+
+###############################################################################
+# cbm_materialize --- gate-check + subprocess to cbsSpec -i cbs_materialize
+###############################################################################
+
+class cbm_materialize(cs.Cmnd):
+    """Materialize this capability: subprocess cbsSpec -i cbs_materialize.
+
+    Gated by cbmProc.control (must be =enabled=). CBS lives elsewhere ---
+    CBM does not duplicate it; it invokes it. The leaf's cbmBootstrap-sbom.pcs,
+    if any, runs first.
+    """
+    cmndParamsMandatory = []
+    cmndParamsOptional = []
+    cmndArgsLen = {'Min': 0, 'Max': 0}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(
+        self,
+        rtInv: cs.RtInvoker,
+        cmndOutcome: b.op.Outcome,
+        argsList: typing.Optional[list[str]] = None,
+    ) -> b.op.Outcome:
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return b_io.eh.badOutcome(cmndOutcome)
+        return _dispatchCbs('cbs_materialize', rtInv, cmndOutcome, bootstrapFirst=True)
 
 
 ###############################################################################
@@ -356,7 +428,7 @@ class cbm_reMaterialize(cs.Cmnd):
         callParamsDict = {}
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
             return b_io.eh.badOutcome(cmndOutcome)
-        return _dispatchCbs('cbs_reMaterialize', rtInv, cmndOutcome)
+        return _dispatchCbs('cbs_reMaterialize', rtInv, cmndOutcome, bootstrapFirst=True)
 
 
 ###############################################################################
@@ -402,7 +474,7 @@ class cbm_sbom(cs.Cmnd):
         callParamsDict = {}
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
             return b_io.eh.badOutcome(cmndOutcome)
-        return _dispatchCbs('cbs_sbom', rtInv, cmndOutcome)
+        return _dispatchCbs('cbs_sbom', rtInv, cmndOutcome, bootstrapFirst=True)
 
 
 ###############################################################################
@@ -434,6 +506,7 @@ def examples_csu() -> None:
     cmnd('cbm_reMaterialize',  comment="# unMaterialize + materialize")
     cmnd('cbm_unMaterialize',  comment="# explicit teardown")
     cmnd('cbm_sbom',           comment="# just the sbom step")
+    cmnd('cbm_bootstrap',      comment="# just ./cbmBootstrap-sbom.pcs (runs first in the above)")
 
 
 ###############################################################################

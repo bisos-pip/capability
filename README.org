@@ -58,6 +58,14 @@ Each of the three tiers in detail:
     (gate manipulation; never gated themselves)
   - =cbm_materialize= / =cbm_reMaterialize= / =cbm_unMaterialize= /
     =cbm_sbom= --- gated; subprocess-invoke =<cbsSpec> -i cbs_<verb>=
+  - =cbm_bootstrap= --- run the leaf's own =cbmBootstrap-sbom.pcs=, which installs what the
+    capability needs before its CBS can run (e.g. the pip package that puts =<cap>-cbs.pcs= on
+    PATH). =cbm_materialize=, =cbm_reMaterialize= and =cbm_sbom= run it first when it exists.
+
+  A leaf's status log is not in the leaf: it is a fact of the host, and the leaf may be a
+  read-only clone. It is at =/bisos/var/cbm/<leafRel>/cbmProc.status=, with =<leafRel>= the
+  leaf's path under =/bisos/git/<vcMode>/bxRepos/= (the vcMode dropped, so an anon and an auth
+  clone share it), next to a =leaf= symlink back to the leaf. =cbm_status= prints the path.
 
 *Load-bearing principle: CBM sits on top of CBS. It does not
 duplicate CBS content.* A =cbmProc.spcs= is a ~10-line pointer file

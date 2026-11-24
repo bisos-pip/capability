@@ -25,6 +25,7 @@ cbmCmnds = [
     'cbm_enable', 'cbm_disable', 'cbm_available',
     'cbm_isEnabled', 'cbm_status', 'cbm_control',
     'cbm_materialize', 'cbm_reMaterialize', 'cbm_unMaterialize', 'cbm_sbom',
+    'cbm_bootstrap',
 ]
 failed = 0
 for n in cbmCmnds:
@@ -50,7 +51,9 @@ for sym in ('CbmProcSeedInfo', 'CbmProcParams', 'ControlState',
             'cbmProcSeedInfo', 'setup', 'paramsFromPlantPath',
             'controlRead', 'controlWrite', 'statusRead', 'statusWrite',
             'leafProcessorNames', 'walkExamples', 'resolveCbsSpec',
-            'CONTROL_FILENAME', 'STATUS_FILENAME'):
+            'CONTROL_FILENAME', 'STATUS_FILENAME',
+            'STATUS_BASE', 'leafRel', 'statusDir', 'statusPath',
+            'BOOTSTRAP_FILENAME', 'bootstrapPath'):
     if not hasattr(si, sym): print(f'  [FAIL] missing symbol: {sym}'); failed += 1
     else: print(f'  [PASS] symbol present: {sym}')
 
@@ -121,6 +124,9 @@ with tempfile.TemporaryDirectory() as td:
     else:
         print(f'  [PASS] unknown value falls back to Available')
 
+    # Status: under STATUS_BASE (here a scratch one), never in the leaf
+    si.STATUS_BASE = plantDir / 'var' / 'cbm'
+
     # Status: empty read
     contents = si.statusRead(plantDir)
     if contents != '':
@@ -141,6 +147,27 @@ with tempfile.TemporaryDirectory() as td:
         print(f'  [FAIL] statusWrite line 2: {lines[1]!r}'); failed += 1
     else:
         print(f'  [PASS] statusWrite appends 2 timestamped lines')
+
+    if (plantDir / si.STATUS_FILENAME).exists():
+        print(f'  [FAIL] statusWrite wrote in the leaf'); failed += 1
+    else:
+        print(f'  [PASS] statusWrite writes nothing in the leaf')
+    link = si.statusDir(plantDir) / si.STATUS_LEAF_LINK
+    if not (link.is_symlink() and link.resolve() == plantDir.resolve()):
+        print(f'  [FAIL] leaf link: {link}'); failed += 1
+    else:
+        print(f'  [PASS] leaf link points back at the leaf')
+
+# leafRel: the vcMode is dropped; outside bxRepos, _abs_/<path>
+for leaf, rel in (
+        ('/bisos/git/anon/bxRepos/bxObjects/bro_x/kafka', 'bxObjects/bro_x/kafka'),
+        ('/bisos/git/auth/bxRepos/bxObjects/bro_x/kafka', 'bxObjects/bro_x/kafka'),
+        ('/home/bystar/site', '_abs_/home/bystar/site')):
+    got = str(si.leafRel(pathlib.Path(leaf)))
+    if got != rel:
+        print(f'  [FAIL] leafRel({leaf}) = {got}, expected {rel}'); failed += 1
+    else:
+        print(f'  [PASS] leafRel({leaf}) = {got}')
 
 sys.exit(failed)
 "
@@ -250,7 +277,8 @@ with tempfile.TemporaryDirectory() as td:
     rel = os.path.relpath(str(fake), start=os.getcwd())
     if '/' in rel:
         got = si.resolveCbsSpec(rel)
-        if got != fake.resolve():
+        # absolute, not resolved (2026-10-19: a spread-planted CBS runs by the path it is planted at)
+        if not got.is_absolute() or got.resolve() != fake.resolve():
             print(f'  [FAIL] resolveCbsSpec relative-with-slash: got {got}'); failed += 1
         else:
             print(f'  [PASS] resolveCbsSpec: relative path with slash resolves')

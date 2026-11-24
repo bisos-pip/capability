@@ -28,6 +28,7 @@ csInfo['status']  = 'inDev'
 import typing
 import enum
 import datetime
+import os
 import pathlib
 import shutil
 from dataclasses import dataclass
@@ -62,8 +63,8 @@ class CbmProcParams:
     """Parameters derived from a cbmProc.spcs plant path.
 
     plantPath      --- resolved absolute path to the .spcs file.
-    plantDir       --- directory containing the .spcs (where .control /
-                       .status also live).
+    plantDir       --- directory containing the .spcs (where .control lives;
+                       .status is under /bisos/var/cbm, see statusPath()).
     capabilityName --- from cbmProc_seedInfo.setup(capabilityName=...) if
                        the .spcs called it, else the leaf directory name.
     """
@@ -227,10 +228,49 @@ def controlWrite(plantDir: pathlib.Path, state: ControlState) -> None:
 #
 # Format: plain text, one line per event (append). Machine-written by the seed
 # after each cbs_* dispatch. NOT JSON (per Q4 decision).
+#
+# Location (2026-11-24): not in the leaf. What a leaf has materialized is a fact of this host, and
+# the leaf may be a read-only clone (an anon clone of a bro_ repo), so the status is under
+#   /bisos/var/cbm/<leafRel>/cbmProc.status
+# with <leafRel> the leaf's resolved directory relative to /bisos/git/<vcMode>/bxRepos/. The vcMode
+# is dropped, so an anon and an auth clone of one leaf share one status. A leaf outside a bxRepos
+# tree is keyed by its absolute path, under _abs_/. Next to the status, a `leaf` symlink points
+# back to the leaf that wrote it last. Nothing is written in the leaf.
 ###############################################################################
 
+STATUS_BASE = pathlib.Path("/bisos/var/cbm")
+STATUS_LEAF_LINK = "leaf"
+
+
+def leafRel(plantDir: pathlib.Path) -> pathlib.PurePath:
+    """The leaf's key under STATUS_BASE: relative to /bisos/git/<vcMode>/bxRepos/, else _abs_/<path>."""
+    parts = pathlib.Path(plantDir).parts
+    if len(parts) > 5 and parts[:3] == ('/', 'bisos', 'git') and parts[4] == 'bxRepos':
+        return pathlib.PurePath(*parts[5:])
+    return pathlib.PurePath('_abs_', *parts[1:])
+
+
+def statusDir(plantDir: pathlib.Path) -> pathlib.Path:
+    return STATUS_BASE / leafRel(plantDir)
+
+
 def statusPath(plantDir: pathlib.Path) -> pathlib.Path:
-    return plantDir / STATUS_FILENAME
+    return statusDir(plantDir) / STATUS_FILENAME
+
+
+def _statusDirEnsure(plantDir: pathlib.Path) -> pathlib.Path:
+    """Create the status directory (group bisos, 2775) and point its `leaf` link at plantDir."""
+    sDir = statusDir(plantDir)
+    missing = [d for d in [sDir, *sDir.parents] if not d.exists()]
+    for d in reversed(missing):
+        d.mkdir()
+        os.chmod(d, 0o2775)     # umask would drop the group write; setgid keeps group bisos
+    link = sDir / STATUS_LEAF_LINK
+    if not (link.is_symlink() and os.readlink(link) == str(plantDir)):
+        tmp = sDir / f".{STATUS_LEAF_LINK}.{os.getpid()}"
+        tmp.symlink_to(plantDir)
+        os.replace(tmp, link)
+    return sDir
 
 
 def statusRead(plantDir: pathlib.Path) -> str:
@@ -250,8 +290,28 @@ def statusWrite(plantDir: pathlib.Path, line: str) -> None:
       'ran: cbs_materialize failed rc=1'
     """
     ts = datetime.datetime.now().isoformat(timespec='seconds')
-    with statusPath(plantDir).open('a') as fh:
+    _statusDirEnsure(plantDir)
+    path = statusPath(plantDir)
+    isNew = not path.exists()
+    with path.open('a') as fh:
         fh.write(f"{ts}  {line}\n")
+    if isNew:
+        os.chmod(path, 0o664)
+
+
+###############################################################################
+# bootstrapPath --- the leaf's own bootstrap sbom (optional)
+#
+# cbmBootstrap-sbom.pcs, next to cbmProc.spcs: what the capability needs before its CBS can run
+# (Phase 1: the pip packages that carry the CBS, into /bisos/venv/py3/bisos3). cbm_bootstrap runs
+# it; cbm_materialize, cbm_reMaterialize and cbm_sbom run it first when it exists.
+###############################################################################
+
+BOOTSTRAP_FILENAME = "cbmBootstrap-sbom.pcs"
+
+
+def bootstrapPath(plantDir: pathlib.Path) -> pathlib.Path:
+    return plantDir / BOOTSTRAP_FILENAME
 
 
 ###############################################################################
