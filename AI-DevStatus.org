@@ -63,7 +63,7 @@ canonical CBM leaf exemplar; walked from
 - On the dev host this package was the PyPI 0.23 copy, not editable; it is now =pip install -e= from
   this repo (the repo differed only by =sysCbmManage_csu.py= and this fix).
 
-2026-11-24 (uncommitted, not released) --- bxGenesis/base 3.1.2.1, Phase 1 of the rawBisosCBM fix:
+2026-11-24 (committed, not released) --- bxGenesis/base 3.1.2.1, Phase 1 of the rawBisosCBM fix:
 - =cbmProc.status= moved to =/bisos/var/cbm/<leafRel>/= with a =leaf= link back (Key Design Decisions);
   =cbm_status= prints the path.
 - =cbm_bootstrap=, and the leaf's =cbmBootstrap-sbom.pcs= run first by =cbm_materialize=,
