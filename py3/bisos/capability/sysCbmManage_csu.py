@@ -239,7 +239,7 @@ This pattern is called listOfArgs subject to Action.
 
         # Then the pals realm: the CBM leaves bisos.pals plants from each PALS-BXO's declarations
         # (palsOfSys.cs -i palsLeavesPlant). After collective/hereWeb, which brings nginx and Node; so
-        # platform.here's snapshot, taken last in hereWeb, shows the pals leaves' previous outcome.
+        # platform.internal's snapshot, taken last in hereWeb, shows the pals leaves' previous outcome.
         # ./ftoBranchProc.spcs: this realm's own branch file, not one found on PATH.
         palsRoot = "/bisos/platform/sys/cbm/pals"
         if os.path.isfile(os.path.join(palsRoot, "ftoBranchProc.spcs")):

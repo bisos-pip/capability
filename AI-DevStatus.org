@@ -26,6 +26,9 @@ Note to a fresh Claude: this file is intentionally sparse at project start.
 Fill in the sections below when asked to update, following the structure provided.
 
 * Current State
+- 2026-11-26 (from a bisos-pip/b session): every =<name>.here= in this repo is now =<name>.internal=
+  (=.here= is an https-only gTLD in Chrome; bisos-pip/banna AI-WorkPlan.org Stage 4, banna's
+  =tcpPorts.hereFqdn=). Text renamed, not tested here; AI-WorkPlan.org keeps =.here= as history.
 
 =bisos.capability= has been extended (non-invasively) with CBM
 (Capability Bundle Materialization) machinery. As of 2026-08-15, four
@@ -100,13 +103,13 @@ canonical CBM leaf exemplar; walked from
 - A read-only survey of all 21 leaves (Stage 4, "Survey of 2026-11-13"), then the agreed order.
 - =<<4.1>>= nginx up: =bisos.webCap='s =nginx-sysd.pcs= runs =nginx-noIpv6.sh= as =preFunc= (no IPv6 in
   this container); the script is now idempotent. =<<4.2>>= the six packages (kafka, prometheus, grafana,
-  pypiserver, devpi, geneweb) materialized: units active, =.here= answering, =driftCheck= clean.
+  pypiserver, devpi, geneweb) materialized: units active, =.internal= answering, =driftCheck= clean.
 - =<<4.7>>= =cbmDispatch= now also walks =collective/induct/= (new =ftoBranchProc.spcs= in
   =bro_rawBisos=), last. A full =fullyMaterialize= ran (7.5 min): hereWeb 14, pals 3, induct 8.
 - =<<4.3>>=, =<<4.4>>=, =<<4.5>>=: the user chose nvm. nvm is at =$XDG_CONFIG_HOME/nvm=, which
   =nvm-sbom.pcs= (bisos/bsip4) did not look for, so no Node had been installed. Fixed there, in
   =bisos.sbom= (npm loads nvm) and in =bisos.webCap= (=nodeEnv.py=; Astro and Gatsby builds load nvm).
-  Node v26.13.1; reactPlus, gatsbyBxSidebar, platform, csPlayerUi materialized and their =.here= sites
+  Node v26.13.1; reactPlus, gatsbyBxSidebar, platform, csPlayerUi materialized and their =.internal= sites
   answer 200 (csPlayerUi's lock is accepted by npm 11). Open in 4.3: =sbom_fullUpdate= runs =sbomsList=
   last (a fresh host would run reactPlus's =npm -g= before nvm), and the fixes reach the =bisos3= venv
   only with releases of bisos.sbom and bisos.webCap.
@@ -208,7 +211,7 @@ Verified end-to-end (2026-08-15):
 - *Real materialization on a VM.* Everything above stops at
   =airflow-cbs.pcs='s inner sbom step because the container lacks the
   target PATH. Full materialization (systemd units brought up +
-  airflow.here DNS + nginx vhost + webserver listening on 24006)
+  airflow.internal DNS + nginx vhost + webserver listening on 24006)
   requires a VM host. Deferred to VM-based validation.
 
 - *Blee panel.* =py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org=
