@@ -316,3 +316,56 @@ except ValueError:
 
 sys.exit(failed)
 "
+
+# --- cbmVerify (Stage 5): cbm_verify, fullyVerify, verifyCompare; the pure functions ---
+
+lpDo python3 -c "
+import sys, pathlib, tempfile
+from bisos.capability import cbmVerify as v, cbmProc_csu, cbmProc_seedInfo as si, sysCbmManage_csu as scm
+failed = 0
+def check(ok, what):
+    global failed
+    print(('  [PASS] ' if ok else '  [FAIL] ') + what); failed += 0 if ok else 1
+
+check(hasattr(cbmProc_csu, 'cbm_verify'), 'Cmnd present: cbm_verify')
+check(hasattr(scm, 'fullyVerify') and hasattr(scm, 'verifyCompare'), 'Cmnds present: fullyVerify, verifyCompare')
+check('verifySpec' in si.setup.__code__.co_varnames and 'verifyUnits' in si.setup.__code__.co_varnames
+      and 'hereName' in si.setup.__code__.co_varnames, 'setup() takes hereName, verifyUnits, verifySpec')
+
+# The verdict line convention
+m = v.VERDICT_RE.match('grafana verify: fail 2 problem(s): not installed')
+check(m and m.group(2) == 'fail' and m.group(3).startswith('2 problem'), 'VERDICT_RE reads a fail line')
+check(v.VERDICT_RE.match('    echo grafana verify: ok') is None, 'VERDICT_RE ignores an indented echo')
+
+# The exit code of the last materialize: recorded, not trusted
+st = '2026-11-26T03:50:27  ran: cbs_materialize ok\n2026-11-26T04:00:00  ran: cbs_materialize failed rc=5\n'
+check(v.materializeRc(st) == 5 and v.materializeRc('') is None, 'materializeRc reads the last outcome')
+
+# A PALS name keeps its suffix; a banna name gets it
+check(v.hereFqdn('example.org.internal') == 'example.org.internal', 'hereFqdn keeps a full .internal name')
+check(v.hereFqdn('grafana').endswith('.internal') and v.hereFqdn('grafana').count('.') == 1, 'hereFqdn adds the suffix')
+
+# A masked failure: rc 0, evidence fail
+rec = v._withRcAgreement({'materializeRc': 0, 'verdict': 'fail'})
+check(rec['rcAgrees'] == 'masked', 'rc 0 with verdict fail is masked')
+
+# logScan: finds a leaf failure, marks it masked, and does not match echoed script source
+log = '\n'.join(['[demo] running: /x/demo-cbs.pcs -i cbs_materialize',
+                 '        echo \'banna: ERROR: uid 503 is held\' >&2',
+                 'io.eh.badOutcome:  -- InvokedBy NOTYET, Operation Failed: Stdcmnd=x Error=5 -- None',
+                 'ran: cbs_materialize ok'])
+with tempfile.NamedTemporaryFile('w', suffix='-log.org', delete=False) as f:
+    f.write(log + '\n')
+hits = v.logScan([pathlib.Path(f.name)])
+check(len(hits) == 1 and hits[0]['leaf'] == 'demo' and hits[0]['masked'], 'logScan: one masked hit, the echo ignored')
+
+# compare: a new failure and a fix
+leaf = lambda name, verdict: {'leafRel': 'x/' + name, 'capabilityName': name, 'verdict': verdict, 'detail': 'd',
+                              'materializeRc': 0, 'rcAgrees': None}
+old = {'generatedAt': 't0', 'verdict': 'fail', 'leaves': [leaf('a', 'ok'), leaf('b', 'fail')], 'platform': []}
+new = {'generatedAt': 't1', 'verdict': 'fail', 'leaves': [leaf('a', 'fail'), leaf('b', 'ok')], 'platform': []}
+c = v.compare(old, new)
+check([x.split(':')[0] for x in c['newFailures']] == ['a'] and c['fixed'] == ['b'], 'compare: new failure a, fixed b')
+
+sys.exit(failed)
+"

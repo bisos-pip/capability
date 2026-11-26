@@ -83,6 +83,8 @@ import collections
 
 import os
 import subprocess
+import json
+import pathlib
 # import time
 
 # import os
@@ -93,6 +95,7 @@ from bisos.bpo import bpo
 from bisos.platform import platformBases_csu
 from bisos.platform import platformBases
 from bisos.basics import pathPlus
+from bisos.capability import cbmVerify
 
 
 ####+BEGIN: b:py3:cs:orgItem/section :title "CSU-Lib Examples" :comment "-- Providing examples_csu"
@@ -135,6 +138,13 @@ def examples_csu(
 
     cmnd('fullyMaterialize')
 
+    cs.examples.menuSection("*Verify --- is this platform healthy? (read-only; AI-WorkPlan.org Stage 5)*")
+
+    cmnd('fullyVerify', comment=" # every leaf's cbm_verify + platform checks + log scan -> /bisos/var/cbm/verify/latest/")
+    cmnd('fullyVerify', args="~/sysCbmFullyMaterialize-*-log.org", comment=" # with these logs scanned")
+    cmnd('verifyCompare', comment=" # the previous report against the latest")
+    cmnd('verifyCompare', args="/bisos/var/cbm/verify/<old> /bisos/var/cbm/verify/<new>", comment=" # two given reports")
+
 
 """ #+begin_org
 *  ---- Devider ----
@@ -176,6 +186,9 @@ This pattern is called listOfArgs subject to Action.
         #+end_org """)
 
         cbmDispatch().pyCmnd()
+
+        # Then the verify: read-only, so a fully materialized platform always ends with its report.
+        fullyVerify().pyCmnd()
 
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
@@ -260,6 +273,150 @@ This pattern is called listOfArgs subject to Action.
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
             opResults=None,
+        )
+
+
+# The walk roots of a full materialization, in cbmDispatch's order, and how each one's branch file
+# is reached there: hereWeb by the ftoBranchProc.spcs on PATH, pals and induct by their own.
+verifyWalkRoots = [
+    ("/bisos/platform/sys/cbm/collective/hereWeb", "ftoBranchProc.spcs"),
+    ("/bisos/platform/sys/cbm/pals", "./ftoBranchProc.spcs"),
+    ("/bisos/platform/sys/cbm/collective/induct", "./ftoBranchProc.spcs"),
+]
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "fullyVerify" :extent "verify" :comment "is this platform healthy?" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 9999 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<fullyVerify>>  *is this platform healthy?*  =verify= argsMax=9999 ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class fullyVerify(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 9999,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+    ) -> b.op.Outcome:
+        """is this platform healthy?"""
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+####+END:
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]] Is this platform healthy? Read-only. Walks the roots of fullyMaterialize with
+cbm_verify (each leaf writes cbmProc.verify), adds the checks no leaf owns (every .internal name
+resolves to its address, nginx -t, systemctl --failed), scans the logs given as args (default: the
+newest ~/raw-bisos-*-log.org and ~/sysCbmFullyMaterialize-*-log.org), and writes
+/bisos/var/cbm/verify/<yymmddHHMMSS>/report.json and report.org (latest -> the newest).
+Verdicts come from evidence, never exit codes (bisos-pip/b Stage 4); exit codes are recorded beside
+them. The last line is "fullyVerify verify: ok|fail ...".
+        #+end_org """)
+
+        runStart = cbmVerify.now()
+
+        # 1. Every leaf verifies itself, in walk order.
+        leafDirs: list[pathlib.Path] = []
+        for root, branchProc in verifyWalkRoots:
+            if not os.path.isfile(os.path.join(root, "ftoBranchProc.spcs")):
+                continue
+            subprocess.run(f"{branchProc} -i fto_forwardToLeaves --cmndName='cbm_verify'",
+                           shell=True, cwd=root, check=False)
+            leafDirs += cbmVerify.leavesUnder(pathlib.Path(root))
+
+        # 2. Collect what each leaf wrote in this run. A leaf the walk did not reach is notRun.
+        leaves = []
+        for plantDir in dict.fromkeys(leafDirs):
+            record = cbmVerify.verifyRead(plantDir)
+            if record is None or record.get("at", "") < runStart:
+                record = {"capabilityName": plantDir.name, "leaf": str(plantDir),
+                          "leafRel": str(cbmVerify.cbmProc_seedInfo.leafRel(plantDir)), "at": runStart,
+                          "gate": cbmVerify.cbmProc_seedInfo.controlRead(plantDir).value,
+                          "lastStatus": "", "materializeRc": None, "checks": [], "rcAgrees": None,
+                          "verdict": "notRun", "detail": "the walk did not reach it (no cbmProc.verify of this run)"}
+            leaves.append(record)
+
+        # 3. The platform: names, nginx, failed units.
+        claimed = {check["target"].split("/")[2] for leaf in leaves for check in leaf["checks"]
+                   if check["kind"] == "http"}
+        platform = cbmVerify.nameChecks(claimed)
+        nginx = cbmVerify.nginxCheck()
+        if nginx:
+            platform.append(nginx)
+        platform += cbmVerify.failedUnitsCheck()
+
+        # 4. The logs.
+        logs = [pathlib.Path(os.path.expanduser(a)) for a in (argsList or [])] or cbmVerify.defaultLogs()
+        logHits = cbmVerify.logScan(logs)
+
+        rep = cbmVerify.report(leaves, platform, logHits, logs)
+        runDir = cbmVerify.reportWrite(rep)
+
+        print(cbmVerify.reportOrg(rep))
+        counts = ", ".join(f"{k} {v}" for k, v in sorted(rep["counts"].items()))
+        masked = f"; masked: {', '.join(rep['maskedFailures'])}" if rep["maskedFailures"] else ""
+        print(f"fullyVerify: leaves {counts}; platform problems {rep['platformProblems']}; "
+              f"log hits {len(logHits)}{masked}; report: {runDir}")
+        print(f"fullyVerify verify: {rep['verdict']} {counts}")
+
+        return cmndOutcome.set(
+            opError=b.op.OpError.Success,
+            opResults=str(runDir),
+        )
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "verifyCompare" :extent "verify" :comment "what changed between two reports" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 2 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<verifyCompare>>  *what changed between two reports*  =verify= argsMax=2 ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class verifyCompare(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 2,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+    ) -> b.op.Outcome:
+        """what changed between two reports"""
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+####+END:
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]] Compare two fullyVerify reports (a run directory or its report.json): new
+failures, fixed, still failing, changed verdicts and exit codes, platform problems. No args: the two
+newest runs under /bisos/var/cbm/verify/. One arg: it against the newest. The comparison of a run
+before and one after bisos-pip/b Stage 4 is that stage's test (AI-WorkPlan.org 5.6).
+        #+end_org """)
+
+        args = list(argsList or [])
+        runs = cbmVerify.reportRuns()
+        if len(args) == 2:
+            oldPath, newPath = args
+        elif len(args) == 1 and runs:
+            oldPath, newPath = args[0], runs[-1]
+        elif len(runs) >= 2:
+            oldPath, newPath = runs[-2], runs[-1]
+        else:
+            print(f"verifyCompare: need two reports; {cbmVerify.REPORT_BASE} has {len(runs)}")
+            return failed(cmndOutcome)
+        try:
+            old, new = cbmVerify.reportRead(oldPath), cbmVerify.reportRead(newPath)
+        except (OSError, ValueError) as e:
+            print(f"verifyCompare: cannot read a report: {e}")
+            return failed(cmndOutcome)
+        changes = cbmVerify.compare(old, new)
+        print(cbmVerify.compareText(old, new, changes))
+        return cmndOutcome.set(
+            opError=b.op.OpError.Success,
+            opResults=json.dumps(changes),
         )
 
 

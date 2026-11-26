@@ -26,6 +26,15 @@ Note to a fresh Claude: this file is intentionally sparse at project start.
 Fill in the sections below when asked to update, following the structure provided.
 
 * Current State
+- 2026-11-26 (from a bisos-pip/b session): *a verify framework* (AI-WorkPlan.org Stage 5, phase A of
+  three: A implementation, done; B PyPI releases; C an end-to-end container run). =cbmVerify.py=,
+  =cbm_verify=, =sysCbmManage.cs -i fullyVerify= / =verifyCompare=; =fullyMaterialize= ends with the
+  verify. Done before bisos-pip/b Stage 4 by Mohsen's decision: verdicts from evidence, exit codes
+  recorded beside them, so the report before and after Stage 4 measures it. Run on the dev host: 22
+  leaves, ok 17, fail 2 (emacsclient not linked; csPlayerPerf has no nginx vhost here --- masked),
+  skip 2, unchecked 1. Not released; the leaves' and packages' changes are in their repos
+  (uncommitted): bro_rawBisos, the eight driftCheck packages, webCap, capSpecs, lcnt, pals,
+  bisos/raw/rebuild.
 - 2026-11-26 (from a bisos-pip/b session): every =<name>.here= in this repo is now =<name>.internal=
   (=.here= is an https-only gTLD in Chrome; bisos-pip/banna AI-WorkPlan.org Stage 4, banna's
   =tcpPorts.hereFqdn=). Text renamed, not tested here; AI-WorkPlan.org keeps =.here= as history.
@@ -229,6 +238,16 @@ Verified end-to-end (2026-08-15):
   run. The nginx IPv6 fix is untested on a host with IPv6.
 
 * Key Design Decisions
+
+** Verify: evidence, not exit codes (2026-11-26, Stage 5)
+A verdict is what a check observed: HTTP (nginx's default page counts as no vhost), =systemctl
+is-active=, the last =<name> verify: ok|fail= line of a leaf's verifySpec. Exit codes are recorded
+(=materializeRc=, a check's =rc=) and compared (=rcAgrees=, =masked=), never used: every PyCS command
+exits 0 until bisos-pip/b Stage 4, and this framework is to measure that stage. Each package owns its
+check (=driftCheck=, =fullCheck=, =toolchainCheck=, =siteVerify=); the framework holds none of their
+knowledge. Rejected: a "verify" CBM leaf materialized last (a leaf changes the system and runs once;
+"last" depends on the walk order), and =cbs_isMaterialized= as a fallback (exit code only). A missing
+=cbmProc.status= is a note when the evidence says the leaf works.
 
 ** CBM as a pointer, not a duplicator (load-bearing)
 

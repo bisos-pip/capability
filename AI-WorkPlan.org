@@ -649,6 +649,14 @@ file" (=package.json= and =package-lock.json= out of sync in =bisos-web/csPlayer
 ** TODO [#B] <<4.6>> csPlayerPerf: first =try-restart= precedes unit creation :ai:
 Cosmetic but reports a failure on first materialize; reorder or use =restart= after enable.
 ----- AI Results: ------
+- 2026-11-26 (from a bisos-pip/b session): seen again in the fresh Debian 13 container run (exit 5,
+  "Unit csPlayerPerf.service not found", then =ran: cbs_materialize ok=). Suggested fix: treat exit 5 as
+  success (=sudo systemctl try-restart csPlayerPerf || [ $? -eq 5 ]=) in
+  =csPlayerPerf-assemble.cs= (bisos-web/csPlayerPerf-drf). Not done.
+- Also found by =fullyVerify= (Stage 5) on the dev host: *csPlayerPerf has no nginx vhost here* ---
+  =/etc/nginx/sites-enabled/= has no =csPlayerPerf.internal=, so =http://csPlayerPerf.internal/= is
+  nginx's default page; masked (materialize rc 0). The unit runs. Not fixed; check whether its CBS
+  installs a vhost at all.
 ** TODO [#B] <<4.7>> =induct= realm: only vscodeClaude is a real CBM :aiAndMe:
 Decide whether emacsSrcBuild, bleeBuild and lcnt get CBM leaves (=cbmProc.spcs= + CBS), and whether
 =induct/= gets an =ftoBranchProc.spcs= so the walk covers it. Decide whether to enable vscodeClaude.
@@ -670,6 +678,194 @@ Decide whether emacsSrcBuild, bleeBuild and lcnt get CBM leaves (=cbmProc.spcs= 
 ** TODO [#C] <<4.8>> Upstream: walker =failed=0= despite real failures (g_csMain) :aiAndMe:
 Already in Known Limitations; this run is a clear example (about 9 failing leaves reported as 0 failed).
 ----- AI Results: ------
+** -
+
+
+* Stage 5: A Verify Framework --- Is This Platform Healthy?
+
+<<Stage 5>>
+
+Goal: after a full materialization (and at any later time, on any host) one command says, from
+evidence, which capabilities work and which do not, as a report a person and a CI run can read. The
+rebuild orchestrators (=bisos/raw/rebuild=: =rawBuildContainer.cs=, and later =rawBuildKvm.cs= and
+=rawBuildBox.cs=) then act as a CI/CD of all of BISOS.
+
+Origin (2026-11-26, a bisos-pip/b session): the fresh Debian 13 container run of that day
+(=mb-ephemera/pub-shuttle/tmp/2611261234/=) had to be read by hand. Its real failures --- csPlayerPerf's
+=try-restart= (=<<4.6>>=), emacsSrcBuild's =emacsclient -> /usr/bin/bash= (bxGenesis/start =<<3.6>>=),
+platform.internal still listing =.here= --- were all printed as =ran: cbs_materialize ok=, and every walk
+said =failed=0=.
+
+** Decisions (Mohsen, 2026-11-26)
+
+- *A verify walk, not a last capability.* Verifying is read-only and is run often; a CBM leaf changes
+  the system, has a gate and a status, and runs once. "Last" would also depend on the walk order. The
+  verify is a verb forwarded to every leaf, like =cbm_materialize=.
+- *Each package owns what healthy means.* A leaf's check is its package's existing one: the eight
+  =<name>Admin.cs -i driftCheck=, =emacs31SrcBuild-assemble.cs -i fullCheck=, blee31Build's summary,
+  =astroProc.spcs -i siteVerify=, the =py3/tests/verify.sh= scripts. The framework aggregates; it holds
+  no capability's knowledge.
+- *This framework first, bisos.b Stage 4 (a failed Cmnd exits non-zero) after.* The framework is built
+  knowing that every PyCS command exits 0 today. Then Stage 4 is done, and the framework shows what it
+  changed: a measurement of a change with wide impact.
+- *Hence: verdicts come from evidence, never from exit codes.* A verdict is what a check observed: an
+  HTTP status, a file, =systemctl is-active=, a check's verdict text (=complete= / =NOT complete=). The
+  exit code of each leaf's materialize and of each check is *recorded beside* the verdict, not used for
+  it. Before bisos.b Stage 4 the report shows mismatches (evidence fail, rc 0: csPlayerPerf,
+  emacsSrcBuild); after it, the verdicts should be the same and the mismatches gone. Any other
+  difference is a regression of Stage 4.
+
+** Design: three layers
+
+1. *Per leaf: =cbm_verify=* in =cbmProc_csu.py= (beside =cbm_materialize=). It runs the check the leaf's
+   =cbmProc.spcs= names in a new =verifySpec= field (as =cbsSpec= names the CBS), e.g.
+   =verifySpec="grafanaAdmin.cs -i driftCheck"=, with =cbs_isMaterialized= as the fallback while a leaf
+   has none. Result: ok / fail / skip (with "skip by design": a gate left =available=, a Container skip),
+   a one-line detail, the check's rc; written to =cbmProc.verify= beside =cbmProc.status=.
+   Not =cbs_verify= in =cba_csu.py=: that file is never edited (cbm-authorship).
+2. *Platform: =sysCbmManage.cs -i fullyVerify=.* =fto_forwardToLeaves --cmndName=cbm_verify= over the
+   same branches as =fullyMaterialize=, plus checks no leaf owns: every banna =hereName= and every PALS
+   name resolves through =/etc/hosts= and answers HTTP; =nginx -t=; =systemctl --failed=; each leaf's
+   last =cbmProc.status= line; optionally a scan of the run's logs (=PROBLEM=, =ERROR= outside =** cmnd==
+   blocks, =badOutcome= followed by =ran: ... ok=). Output: a machine-readable report (JSON or
+   py-literal) and an org summary, under =/bisos/var/cbm/=, with a date tag. =fullyMaterialize= may run
+   it as its last step.
+3. *CI: =bisos/raw/rebuild=.* A =verify= step after =rawBisosCBMs= (the =endVerify= / =endNotify= params
+   of =rawBuild_csu.py= are declared, unused): run =fullyVerify= inside, copy the report and both logs
+   (=~/raw-bisos-*-log.org=, =~/sysCbmFullyMaterialize-*-log.org=) to the host under the run's date tag,
+   compare with the previous run's report (new failures, fixes), then =endNotify=. The same step for
+   container, KVM and box.
+
+The platform site (bro_rawBisos =web/astro=, =content/bin/platformCapabilities.py=) already reads each
+leaf's status and probes each =.internal= site; reading the verify report instead makes its
+=rawBisosCBMs= page the dashboard.
+
+** Pitfalls
+
+- Services start slowly after a walk (kafka, gitlab): HTTP probes need retries and a timeout.
+- Expected skips are not failures: lcntMultiMedia skips 14 programs in a Container; pltfrmDevelBecome
+  and vscodeClaude are =available= by choice. The check needs to know the environment.
+- While known failures are open (bxGenesis/start Stage 3, =<<4.6>>=), the comparison flags changes, not
+  every known failure: keep a known-failures list, or compare against the previous report.
+- A check must be read-only: =driftCheck= and =fullCheck= are; anything that repairs is not a check.
+
+* Stage 5 TODOs
+** +
+** TODO [#A] <<5.1>> =verifySpec= in =cbmProc_seedInfo= and =cbm_verify= in =cbmProc_csu.py=  :aiAndMe:
+The result shape (ok / fail / skip-by-design, detail, rc) and =cbmProc.verify=; the fallback to
+=cbs_isMaterialized=. Extend =py3/tests/verify.sh=.
+----- AI Results: ------
+- 2026-11-26 (phase A of Mohsen's three: A implementation, B PyPI release, C end-to-end test).
+  New module =py3/bisos/capability/cbmVerify.py= (pure functions, shared by the Cmnds and by
+  bisos/raw/rebuild). =cbmProc_seedInfo.setup()= takes =hereName=, =verifyUnits=, =verifySpec= (all
+  optional). =cbm_verify= (=cbmProc_csu.py=, beside the other =cbm_*=) writes =cbmProc.verify= (JSON,
+  overwritten) next to =cbmProc.status=; its last line is =<name> verify: <verdict> <detail>=.
+- Verdicts: =ok=, =fail=, =skip= (gate not enabled), =unchecked= (nothing declared), and in fullyVerify
+  =notRun=. Evidence: the leaf's =.internal= name answers HTTP (declared, or capabilityName when it
+  resolves; retried 3x; *nginx's default page is a fail*, "no vhost": it answers 200 for every name
+  without a vhost), =systemctl is-active= of each verifyUnit, the verifySpec's last
+  =<name> verify: ok|fail= line, and the leaf's own =failed:= status line. =materializeRc= (from
+  =cbmProc.status=) and the check's rc are recorded; =rcAgrees= is =masked= when the evidence says fail
+  and the rc said 0.
+- Not the =cbs_isMaterialized= fallback: it reports only by exit code. A leaf with nothing declared
+  is =unchecked=, which says so.
+- No materialize record is a *note* when the evidence says the leaf works (the status moved to
+  /bisos/var/cbm on 2026-11-24: the induct leaves of the dev host have none), a fail when there is
+  nothing else to check.
+- Tests: =py3/tests/verify.sh= +12 assertions (verdict regex, materializeRc, hereFqdn, masked,
+  logScan, compare): 77 PASS, 0 FAIL.
+
+** TODO [#A] <<5.2>> =verifySpec= in the leaves, from the existing package checks  :aiAndMe:
+The eight =driftCheck= packages, emacsSrcBuild and bleeBuild (=fullCheck=), the Astro sites
+(=siteVerify=), lcnt; list the leaves with no check and what theirs should be.
+----- AI Results: ------
+- 2026-11-26. The verdict line (Mohsen: agreed), =<name> verify: ok|fail <detail>=, added as the last
+  line of: the eight =driftCheck= (kafka, prometheus, grafana, pypiserver, devpi, gitlab, geneweb,
+  airflow --- a =_problem()= helper records not installed / cannot read / unit identity missing / link
+  off its pin / pinned package missing / admin or account missing / not initialized; a diff against
+  the generator stays a finding, as their docstrings say); webCap =siteVerify=; capSpecs
+  emacs31SrcBuild, blee31Build, pltfrmDevelBecome =fullCheck=; lcnt lcntCore, lcntBases, lcntMultiMedia
+  =toolchainCheck= (its Container skips in the ok line).
+- The leaves (bro_rawBisos =sys/cbm/collective/=, 19) and the packages' =cbmProc-<name>.spcs= templates
+  (14) got =verifyUnits= / =verifySpec= (the unit names from this host's =systemctl=); gatsbyBxSidebar
+  =hereName="starterSidebar"=. The PALS leaves: bisos.pals =palsOfSys.leafSpcs= generates
+  =hereName= (the PALS's =uri/here/value=) and its site's =siteVerify=; the example leaf replanted.
+- Leaves with no check: nginx (units only; =nginx -t= is a platform check), csPlayerPerf (unit + HTTP),
+  gatsbyBxSidebar (HTTP), reactPlus (=unchecked=: a toolchain; its check would be =node= / =npm=
+  versions), vscodeClaude (skip; would be =vscodeClaude= verify.sh). gitlab's template has its
+  driftCheck; no gitlab leaf here.
+- Each check run here, read-only: the eight driftChecks ok except gitlab (not installed here: correct),
+  siteVerify ok on three sites, emacs31SrcBuild fail client link (correct: not linked on this host),
+  blee31Build ok (once fail doom: =bin/doom version= on a cold start; not reproduced in three runs).
+
+** TODO [#A] <<5.3>> =sysCbmManage.cs -i fullyVerify= and the checks across the platform  :aiAndMe:
+The walk, the =.internal= / PALS HTTP probes (with retries), =nginx -t=, =systemctl --failed=, the
+report (machine-readable + org) and its place under =/bisos/var/cbm/=. Whether =fullyMaterialize=
+calls it at its end.
+----- AI Results: ------
+- 2026-11-26. =sysCbmManage.cs -i fullyVerify [logs]=: forwards =cbm_verify= over cbmDispatch's three
+  roots (=verifyWalkRoots=), collects each leaf's =cbmProc.verify= of this run (else =notRun=), adds:
+  every banna and PALS name resolves to its address (HTTP only as info for names no enabled leaf
+  claims), =nginx -t=, =systemctl --failed=; scans the logs. Report:
+  =/bisos/var/cbm/verify/<yymmddHHMMSS>/report.json= + =report.org=, =latest= -> the newest (schema
+  =bisos.capability.cbmVerify/1=). Last line =fullyVerify verify: ok|fail <counts>=.
+  =verifyCompare [old [new]]= compares two reports (default the two newest).
+- =fullyMaterialize= now calls =fullyVerify= at its end (read-only).
+- Run on the dev host (twice, 2026-11-26 22:08 and 22:10): 22 leaves, ok 17, fail 2, skip 2,
+  unchecked 1; platform problems 0. The fails are real: emacsSrcBuild (emacsclient not linked here) and
+  *csPlayerPerf: no nginx vhost on this host* --- =http://csPlayerPerf.internal/= is nginx's default page
+  (=/etc/nginx/sites-enabled/= has no csPlayerPerf.internal), reported =masked= (materialize rc 0).
+  Not fixed here. verifyCompare of the two runs listed exactly what the fixes between them changed.
+- Not done: the =_dev= names answer nginx's default page (no dev server running); reported as info.
+
+** TODO [#B] <<5.4>> The log scan  :aiAndMe:
+The patterns, with the 2026-11-26 logs as the test: it must find csPlayerPerf, emacsclient, and not
+the script source echoed in =** cmnd== blocks.
+----- AI Results: ------
+- 2026-11-26. =cbmVerify.logScan=: patterns anchored at what a program prints (EH_Problem, EH_ PROBLEM,
+  badOutcome Operation Failed, a check's FAIL row, NOT complete, =verify: fail=, systemd =Failed to=,
+  apt =E:=, Traceback, a leaf's =failed= line); each hit is attributed to the last =[<leaf>] running:=
+  line and marked =masked= when that leaf's next line is =ran: ... ok=. Default logs: the newest
+  =~/raw-bisos-*-log.org= and =~/sysCbmFullyMaterialize-*-log.org= written in the last 24 h (an older one
+  is another run's: the first run here picked a 2026-11-04 log).
+- Tested on the 2026-11-26 container logs: 10 hits --- csPlayerPerf (3, masked), emacsSrcBuild (4,
+  masked: EH_Problem, badOutcome, =client link FAIL=, =NOT complete=), and the three bash PROBLEMs of
+  bxGenesis/start Stage 3 (rows 5, 7, 9); no echoed script source (=banna: ERROR:=) matched.
+
+** TODO [#B] <<5.5>> The =verify= step in =bisos/raw/rebuild= (=endVerify=, =endNotify=)  :aiAndMe:
+:PROPERTIES:
+:REPO: bisos/raw/rebuild
+:END:
+Run inside, copy the report and logs to the host, compare with the previous run.
+----- AI Results: ------
+- 2026-11-26. =rawBuildContainer.cs= step =verify= (=_rawBuild_stepVerify=): =docker exec -u bystar
+  <container> bash -ic 'sysCbmManage.cs -i fullyVerify'=, then =docker cp= of the report directory and
+  the newest two logs to =/bisos/var/rawBuild/<container>/<yymmddHHMMSS>/=, then =cbmVerify.compare=
+  with the previous run there (=compare.txt=), then the summary (endNotify: printed; no channel yet).
+  The step fails only when no report could be collected; a fail verdict is a result. Examples:
+  the full pipeline + =verify=, and =verify= alone. =endVerify= / =endNotify= params stay unused: the
+  step list is the mechanism.
+- Not run: this host has no docker. Phase C.
+
+** TODO [#B] <<5.6>> The baseline run, then bisos.b Stage 4, then the comparison  :aiAndMe:
+A fresh container run with 5.1--5.5 in place: the baseline report (with its rc mismatches). Then
+bisos.b Stage 4; a second run; the comparison is that stage's test (bisos-pip/b =AI-WorkPlan.org=).
+----- AI Results: ------
+
+** TODO [#C] <<5.7>> platform.internal reads the verify report  :aiAndMe:
+:PROPERTIES:
+:REPO: bxObjects/bro_rawBisos
+:END:
+----- AI Results: ------
+- 2026-11-26. =web/astro/content/bin/platformCapabilities.py= reads
+  =/bisos/var/cbm/verify/latest/report.json= (=--verifyReport=): each capability gets =verify=
+  (verdict, detail, at, rcAgrees), the snapshot a =verify= summary; its own probe says "no vhost" for
+  nginx's default page. Site: =components/Verdict.astro=, a Verify column in =CapabilityTable=, a
+  Verify row (verdict, detail, when) on each leaf's page, =cbm_verify= in its Operating It. Built and
+  served here: csPlayerPerf's page shows "fail (masked)". The Gatsby copy is not changed.
+- Lag: the site is built in the hereWeb walk, before the verify of the same run, so it shows the
+  previous report until =platform-assemble.cs -i siteBuild= runs again.
+
 ** -
 
 * Known Limitations Carried Forward

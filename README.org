@@ -96,6 +96,27 @@ CBM machinery (additive, non-invasive to the above):
   (=sys/cbm/pals/<palsBxo>/<cbm>/=, planted by bisos.pals's =palsOfSys.cs=), then =collective/induct=
   (non-service installs: lcnt, emacsSrcBuild, bleeBuild, ...), each when it has a =ftoBranchProc.spcs=
 
+Verify --- is this platform healthy? (read-only; AI-WorkPlan.org Stage 5):
+
+- =cbmVerify.py= --- the evidence of a leaf, the checks across the platform, the log scan, the report
+  and the comparison of two reports. Verdicts come from evidence, never exit codes; exit codes are
+  recorded beside them (=masked=: it failed, yet exited 0).
+- =cbm_verify= (=cbmProc_csu.py=) --- one leaf: its =.internal= name answers (nginx's default page is a
+  fail), its =verifyUnits= are active, its =verifySpec= ends with =<name> verify: ok|fail=. Writes
+  =cbmProc.verify= next to =cbmProc.status=. A leaf declares what to check in its =cbmProc.spcs=:
+  #+begin_src python
+  cbmProc_seedInfo.setup(
+      capabilityName="grafana",
+      cbsSpec="grafana-cbs.pcs",
+      verifyUnits=["grafana"],
+      verifySpec="grafanaAdmin.cs -i driftCheck",
+  )
+  #+end_src
+- =sysCbmManage.cs -i fullyVerify [logs]= --- every leaf, plus every =.internal= name resolving to its
+  address, =nginx -t=, =systemctl --failed=, and a scan of the run's logs; writes
+  =/bisos/var/cbm/verify/<date>/report.json= and =report.org= (=latest= -> the newest).
+  =fullyMaterialize= ends with it. =sysCbmManage.cs -i verifyCompare= compares the two newest reports.
+
 An explicit =cbsSpec= path is used as planted, not resolved: a CBS that is a symlink to a generic,
 spread-planted file (a PALS site's =cbm/pals-cbs.spcs=) runs by its own path, which is how it finds its
 parameters.
@@ -110,10 +131,11 @@ layering.
 
 ** Tests
 
-=py3/tests/verify.sh= --- 54-assertion smoke suite covering the
+=py3/tests/verify.sh= --- 77-assertion smoke suite covering the
 singleton, Cmnd class presence, control/status roundtrips,
-paramsFromPlantPath, walkExamples coverage, and =cbsSpec= resolution
-across absolute-path/slash-path/basename forms.
+paramsFromPlantPath, walkExamples coverage, =cbsSpec= resolution
+across absolute-path/slash-path/basename forms, and the verify functions
+(verdict line, materialize rc, masked, log scan, report comparison).
 
 
 #+BEGIN: b:org:pypi:readme/pkgDocumentation :pkgName "capability-cs" :comment "basic"

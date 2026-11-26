@@ -24,6 +24,7 @@ from bisos.b import cs
 from bisos.b import b_io
 
 from bisos.capability import cbmProc_seedInfo
+from bisos.capability import cbmVerify
 
 
 ###############################################################################
@@ -194,6 +195,46 @@ class cbm_status(cs.Cmnd):
         else:
             b_io.ann.write(f"[{p.capabilityName}] {path}:\n{contents}")
         return cmndOutcome.set(opError=b.op.OpError.Success, opResults=contents)
+
+
+###############################################################################
+# cbm_verify --- is this capability healthy? Evidence, not exit codes.
+###############################################################################
+
+class cbm_verify(cs.Cmnd):
+    """Verify this capability from evidence and write the record to cbmProc.verify.
+
+    Read-only. Not gated: a leaf whose control is not enabled gets the verdict =skip=. Otherwise
+    it checks what the .spcs declares (cbmProc_seedInfo.setup): the .internal name answers HTTP
+    (hereName, default capabilityName when that name resolves), the verifyUnits are active, and
+    the verifySpec command's last "<name> verify: ok|fail" line. Exit codes are recorded beside the
+    verdict, never used for it (bisos-pip/b Stage 4). The last line printed is
+    "<capabilityName> verify: <verdict> <detail>". AI-WorkPlan.org Stage 5.
+    """
+    cmndParamsMandatory = []
+    cmndParamsOptional = []
+    cmndArgsLen = {'Min': 0, 'Max': 0}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(
+        self,
+        rtInv: cs.RtInvoker,
+        cmndOutcome: b.op.Outcome,
+        argsList: typing.Optional[list[str]] = None,
+    ) -> b.op.Outcome:
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return b_io.eh.badOutcome(cmndOutcome)
+        p = _params()
+        si = cbmProc_seedInfo.cbmProcSeedInfo
+        record = cbmVerify.leafVerify(p.plantDir, p.capabilityName, si.hereName, si.verifyUnits, si.verifySpec)
+        path = cbmVerify.verifyWrite(p.plantDir, record)
+        for check in record["checks"]:
+            print(f"  {'ok  ' if check['ok'] else 'FAIL'} {check['kind']:6} {check['target']}  {check['detail']}")
+        print(f"  record: {path}")
+        # Its own line, which logScan reads like any check's.
+        print(f"{p.capabilityName} verify: {record['verdict']} {record['detail']}")
+        return cmndOutcome.set(opError=b.op.OpError.Success, opResults=record["verdict"])
 
 
 ###############################################################################
@@ -491,6 +532,7 @@ def examples_csu() -> None:
     cmnd('cbm_control',    comment="# read cbmProc.control")
     cmnd('cbm_status',     comment="# read cbmProc.status")
     cmnd('cbm_isEnabled',  comment="# 0 iff enabled")
+    cmnd('cbm_verify',     comment="# is it healthy? evidence (http, units, verifySpec) -> cbmProc.verify")
 
     cs.examples.menuSection('State writers')
     cmnd('cbm_enable',     comment="# --> enabled")

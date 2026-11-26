@@ -115,6 +115,12 @@ class CbmProcSeedInfo:
     capabilityName: str | None = None
     cbsSpec: str | None = None
     examplesFuncsList: list[typing.Callable] | None = None
+    # What cbm_verify checks (all optional; cbmVerify.leafVerify): the leaf's .internal name when it is
+    # not capabilityName, the systemd units that must be active, and a read-only check command whose
+    # last line is "<name> verify: ok|fail ..." (run in the leaf's directory).
+    hereName: str | None = None
+    verifyUnits: list[str] | None = None
+    verifySpec: str | None = None
 
     _instance = None
     def __new__(cls):
@@ -130,11 +136,18 @@ def setup(
         capabilityName: str | None = None,
         cbsSpec: str | None = None,
         examplesFuncsList: list[typing.Callable] | None = None,
+        hereName: str | None = None,
+        verifyUnits: list[str] | None = None,
+        verifySpec: str | None = None,
 ) -> None:
     """Populate the CbmProcSeedInfo singleton from a cbmProc.spcs.
 
     cbsSpec: path (absolute, or containing a slash) OR basename (PATH-resolved
     via shutil.which). See resolveCbsSpec().
+
+    hereName, verifyUnits, verifySpec: what cbm_verify checks. hereName defaults to capabilityName
+    (checked when that name resolves); e.g. verifyUnits=["grafana"],
+    verifySpec="grafanaAdmin.cs -i driftCheck".
     """
     if capabilityName is not None:
         cbmProcSeedInfo.capabilityName = capabilityName
@@ -142,6 +155,12 @@ def setup(
         cbmProcSeedInfo.cbsSpec = cbsSpec
     if examplesFuncsList is not None:
         cbmProcSeedInfo.examplesFuncsList = examplesFuncsList
+    if hereName is not None:
+        cbmProcSeedInfo.hereName = hereName
+    if verifyUnits is not None:
+        cbmProcSeedInfo.verifyUnits = list(verifyUnits)
+    if verifySpec is not None:
+        cbmProcSeedInfo.verifySpec = verifySpec
 
 
 ###############################################################################
@@ -355,6 +374,11 @@ def walkExamples() -> list:
         WalkExampleSpec(
             cmndName='cbm_isEnabled',
             comment="# exit 0 if enabled, else 1",
+            tags=frozenset({'read-only'}),
+        ),
+        WalkExampleSpec(
+            cmndName='cbm_verify',
+            comment="# is it healthy? evidence -> cbmProc.verify",
             tags=frozenset({'read-only'}),
         ),
         # -- Control state changes --------------------------------------
