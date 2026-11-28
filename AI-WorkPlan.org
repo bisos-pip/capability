@@ -687,7 +687,7 @@ Already in Known Limitations; this run is a clear example (about 9 failing leave
 
 Goal: after a full materialization (and at any later time, on any host) one command says, from
 evidence, which capabilities work and which do not, as a report a person and a CI run can read. The
-rebuild orchestrators (=bisos/raw/rebuild=: =rawBuildContainer.cs=, and later =rawBuildKvm.cs= and
+rebuild orchestrators (=bisos/raw/rebuild=: =rawBuildContainer.cs=, and later =rawBuildGuest.cs= and
 =rawBuildBox.cs=) then act as a CI/CD of all of BISOS.
 
 Origin (2026-11-26, a bisos-pip/b session): the fresh Debian 13 container run of that day
