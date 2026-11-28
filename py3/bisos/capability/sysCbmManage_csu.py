@@ -242,6 +242,16 @@ This pattern is called listOfArgs subject to Action.
             f"""echo Capability Materialization Started in $(pwd) at $(date)""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
+        # First collective/induct: non-service capabilities, in the order of its ftoBranchProc.spcs ---
+        # Emacs from source and Blee, then lcnt. Before the web: a site's LaTeX pages need lcnt's HeVeA.
+        # Each CBM should still bring what it needs itself; this order is not to be relied upon.
+        inductRoot = "/bisos/platform/sys/cbm/collective/induct"
+        if os.path.isfile(os.path.join(inductRoot, "ftoBranchProc.spcs")):
+            for cmndName in ('cbm_status', 'cbm_materialize'):
+                if b.subProc.WOpW(invedBy=self, cd=inductRoot, log=1).bash(
+                    f"""./ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='{cmndName}'""",
+                ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
+
         if b.subProc.WOpW(invedBy=self, cd=walkRoot, log=1).bash(
             f"""ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='cbm_status'""",
         ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
@@ -261,15 +271,6 @@ This pattern is called listOfArgs subject to Action.
                     f"""./ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='{cmndName}'""",
                 ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
 
-        # Then collective/induct: non-service capabilities (lcnt, Emacs from source, Blee, ...), in the
-        # order of its ftoBranchProc.spcs. Last: none of the services above needs them. AI-WorkPlan.org 4.7.
-        inductRoot = "/bisos/platform/sys/cbm/collective/induct"
-        if os.path.isfile(os.path.join(inductRoot, "ftoBranchProc.spcs")):
-            for cmndName in ('cbm_status', 'cbm_materialize'):
-                if b.subProc.WOpW(invedBy=self, cd=inductRoot, log=1).bash(
-                    f"""./ftoBranchProc.spcs -i fto_forwardToLeaves --cmndName='{cmndName}'""",
-                ).isProblematic(): return(b_io.eh.badOutcome(cmndOutcome))
-
         return cmndOutcome.set(
             opError=b.op.OpError.Success,
             opResults=None,
@@ -279,9 +280,9 @@ This pattern is called listOfArgs subject to Action.
 # The walk roots of a full materialization, in cbmDispatch's order, and how each one's branch file
 # is reached there: hereWeb by the ftoBranchProc.spcs on PATH, pals and induct by their own.
 verifyWalkRoots = [
+    ("/bisos/platform/sys/cbm/collective/induct", "./ftoBranchProc.spcs"),
     ("/bisos/platform/sys/cbm/collective/hereWeb", "ftoBranchProc.spcs"),
     ("/bisos/platform/sys/cbm/pals", "./ftoBranchProc.spcs"),
-    ("/bisos/platform/sys/cbm/collective/induct", "./ftoBranchProc.spcs"),
 ]
 
 
